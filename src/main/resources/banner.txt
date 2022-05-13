@@ -1,0 +1,10 @@
+ __    _  __                       _                            __
+ \ \  | |/ /   ___   _   _   ___  | |_    ___    _ __    ___   / /
+  | | | ' /   / _ \ | | | | / __| | __|  / _ \  | '__|  / _ \ | |
+  | | | . \  |  __/ | |_| | \__ \ | |_  | (_) | | |    |  __/ | |
+  | | |_|\_\  \___|  \__, | |___/  \__|  \___/  |_|     \___| | |
+ /_/                 |___/                                     \_\
+
+CZERTAINLY Entity Provider
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}

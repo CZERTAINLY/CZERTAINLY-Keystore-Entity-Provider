@@ -82,6 +82,18 @@ public class ExceptionHandlingAdvice {
         return ErrorMessageDto.getInstance(ex.getMessage());
     }
 
+    /**
+     * Handler for {@link IllegalStateException}.
+     *
+     * @return
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessageDto handleIllegalState(IllegalStateException ex) {
+        LOG.info("HTTP 400: {}", ex.getMessage());
+        return ErrorMessageDto.getInstance(ex.getMessage());
+    }
+
 //    /**
 //     * Handler for {@link AccessDeniedException}.
 //     */

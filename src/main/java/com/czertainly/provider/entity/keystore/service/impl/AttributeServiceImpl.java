@@ -2,10 +2,8 @@ package com.czertainly.provider.entity.keystore.service.impl;
 
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.model.common.*;
-import com.czertainly.api.model.connector.entity.EntityInstanceDto;
 import com.czertainly.api.model.core.credential.CredentialDto;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
-import com.czertainly.provider.entity.keystore.enums.KeystoreType;
 import com.czertainly.provider.entity.keystore.service.AttributeService;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.enums.AuthenticationType;
@@ -100,32 +98,6 @@ public class AttributeServiceImpl implements AttributeService {
         return true;
     }
 
-    @Override
-    public List<AttributeDefinition> listLocationAttributes(EntityInstanceDto entity) {
-        logger.info("Getting the Attributes for Location of Entity {} with UUID {}", entity.getName(), entity.getUuid());
-
-        List<AttributeDefinition> attrs = new ArrayList<>();
-        attrs.add(buildKeystorePathAttribute());
-        attrs.add(buildKeystorePasswordAttribute());
-        attrs.add(buildKeystoreTypeAttribute());
-
-        return attrs;
-    }
-
-    @Override
-    public boolean validateLocationAttributes(EntityInstanceDto entity, List<RequestAttributeDto> attributes) throws ValidationException {
-        AttributeDefinitionUtils.validateAttributes(listLocationAttributes(entity), attributes);
-
-        String keystoreType = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, attributes);
-
-        if (!isKeystoreTypeSupported(keystoreType)) {
-            logger.debug("Unsupported Keystore type {}", keystoreType);
-            throw new ValidationException("Unsupported Keystore type " + keystoreType);
-        }
-
-        return true;
-    }
-
     private boolean isKindSupported(String kind) {
         return kind.equals("Keystore");
     }
@@ -143,53 +115,5 @@ public class AttributeServiceImpl implements AttributeService {
         return false;
     }
 
-    private boolean isKeystoreTypeSupported(String keystoreType) {
-        for (KeystoreType c : KeystoreType.values()) {
-            if (c.name().equals(keystoreType)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    private AttributeDefinition buildKeystorePathAttribute() {
-        AttributeDefinition attribute = new AttributeDefinition();
-        attribute.setUuid("12f55fa9-49a3-4afe-906b-ad48c76641ce");
-        attribute.setName(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH);
-        attribute.setLabel(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH_LABEL);
-        attribute.setType(BaseAttributeDefinitionTypes.STRING);
-        attribute.setRequired(true);
-        attribute.setReadOnly(false);
-        attribute.setVisible(true);
-        attribute.setDescription("Full path to the Keystore located on the Entity");
-        attribute.setValidationRegex("^(/[^/ ]*)+/?$");
-        return attribute;
-    }
-
-    private AttributeDefinition buildKeystorePasswordAttribute() {
-        AttributeDefinition attribute = new AttributeDefinition();
-        attribute.setUuid("12ad2fd2-6ca1-4770-a28d-c2eb35ed02da");
-        attribute.setName(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD);
-        attribute.setLabel(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD_LABEL);
-        attribute.setType(BaseAttributeDefinitionTypes.SECRET);
-        attribute.setRequired(true);
-        attribute.setReadOnly(false);
-        attribute.setVisible(true);
-        attribute.setDescription("Password for the Keystore");
-        return attribute;
-    }
-
-    private AttributeDefinition buildKeystoreTypeAttribute() {
-        AttributeDefinition attribute = new AttributeDefinition();
-        attribute.setUuid("731d8858-7c9c-4f84-8d87-937d81d3447b");
-        attribute.setName(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE);
-        attribute.setLabel(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE_LABEL);
-        attribute.setType(BaseAttributeDefinitionTypes.LIST);
-        attribute.setRequired(true);
-        attribute.setReadOnly(false);
-        attribute.setVisible(true);
-        attribute.setValue(EnumSet.allOf(KeystoreType.class));
-        attribute.setDescription("Type of the Keystore");
-        return attribute;
-    }
 }

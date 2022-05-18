@@ -8,8 +8,9 @@ import com.czertainly.api.model.common.AttributeDefinition;
 import com.czertainly.api.model.common.RequestAttributeDto;
 import com.czertainly.api.model.connector.entity.EntityInstanceDto;
 import com.czertainly.api.model.connector.entity.EntityInstanceRequestDto;
-import com.czertainly.provider.entity.keystore.service.AttributeService;
+import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
 import com.czertainly.provider.entity.keystore.service.EntityService;
+import com.czertainly.provider.entity.keystore.service.LocationAttributeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,7 @@ public class EntityControllerImpl implements EntityController {
     EntityService entityService;
 
     @Autowired
-    AttributeService attributeService;
+    LocationAttributeService locationAttributeService;
 
     @Override
     public List<EntityInstanceDto> listEntityInstances() {
@@ -31,7 +32,7 @@ public class EntityControllerImpl implements EntityController {
 
     @Override
     public EntityInstanceDto getEntityInstance(String entityUuid) throws NotFoundException {
-        return entityService.getEntityInstance(entityUuid);
+        return entityService.getEntityInstance(entityUuid).mapToDto();
     }
 
     @Override
@@ -51,13 +52,13 @@ public class EntityControllerImpl implements EntityController {
 
     @Override
     public List<AttributeDefinition> listLocationAttributes(String entityUuid) throws NotFoundException {
-        EntityInstanceDto entity = entityService.getEntityInstance(entityUuid);
-        return attributeService.listLocationAttributes(entity);
+        EntityInstance entity = entityService.getEntityInstance(entityUuid);
+        return locationAttributeService.listLocationAttributes(entity);
     }
 
     @Override
     public void validateLocationAttributes(String entityUuid, List<RequestAttributeDto> attributes) throws ValidationException, NotFoundException {
-        EntityInstanceDto entity = entityService.getEntityInstance(entityUuid);
-        attributeService.validateLocationAttributes(entity, attributes);
+        EntityInstance entity = entityService.getEntityInstance(entityUuid);
+        locationAttributeService.validateLocationAttributes(entity, attributes);
     }
 }

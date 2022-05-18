@@ -63,10 +63,9 @@ public class EntityServiceImpl implements EntityService {
     }
 
     @Override
-    public EntityInstanceDto getEntityInstance(String entityUuid) throws NotFoundException {
+    public EntityInstance getEntityInstance(String entityUuid) throws NotFoundException {
         return entityInstanceRepository.findByUuid(entityUuid)
-                .orElseThrow(() -> new NotFoundException(EntityInstance.class, entityUuid))
-                .mapToDto();
+                .orElseThrow(() -> new NotFoundException(EntityInstance.class, entityUuid));
     }
 
     @Override
@@ -167,6 +166,31 @@ public class EntityServiceImpl implements EntityService {
         } catch (Exception e) {
             logger.error("Fail to remove session between Entity {} and {} from cache due to error {}", instance.getId(), instance.getHost(), e.getMessage(), e);
         }
+    }
+
+    @Override
+    public ClientSession getSession(String entityUuid) throws NotFoundException {
+        EntityInstance instance = entityInstanceRepository
+                .findByUuid(entityUuid)
+                .orElseThrow(() -> new NotFoundException(EntityInstance.class, entityUuid));
+        return getSession(instance);
+    }
+
+    private synchronized ClientSession getSession(EntityInstance instance) {
+        ClientSession session = sessionCache.get(instance.getId());
+        if (session != null) {
+            return session;
+        }
+
+        session = establishSession(instance);
+
+        try {
+            sessionCache.put(instance.getId(), session);
+        } catch (Exception e) {
+            logger.error("Fail to cache session between Entity {} and {} due to error {}", instance.getId(), instance.getHost(), e.getMessage(), e);
+        }
+
+        return session;
     }
 
     private ClientSession establishSession(EntityInstance instance) {

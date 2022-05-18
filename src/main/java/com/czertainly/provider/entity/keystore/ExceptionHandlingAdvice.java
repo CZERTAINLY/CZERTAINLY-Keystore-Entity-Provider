@@ -22,7 +22,7 @@ public class ExceptionHandlingAdvice {
      * Handler for {@link NotFoundException}.
      *
      * @param ex Caught {@link NotFoundException}.
-     * @return
+     * @return Error message in the payload
      */
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -34,7 +34,7 @@ public class ExceptionHandlingAdvice {
     /**
      * Handler for {@link AlreadyExistException}.
      *
-     * @return
+     * @return Error message in the payload
      */
     @ExceptionHandler(AlreadyExistException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -46,7 +46,7 @@ public class ExceptionHandlingAdvice {
     /**
      * Handler for {@link NotDeletableException}.
      *
-     * @return
+     * @return Error message in the payload
      */
     @ExceptionHandler(NotDeletableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -58,7 +58,7 @@ public class ExceptionHandlingAdvice {
     /**
      * Handler for {@link ValidationException}.
      *
-     * @return
+     * @return Error message in the payload
      */
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -73,7 +73,7 @@ public class ExceptionHandlingAdvice {
     /**
      * Handler for {@link HttpMessageNotReadableException}.
      *
-     * @return
+     * @return Error message in the payload
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -85,11 +85,23 @@ public class ExceptionHandlingAdvice {
     /**
      * Handler for {@link IllegalStateException}.
      *
-     * @return
+     * @return Error message in the payload
      */
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessageDto handleIllegalState(IllegalStateException ex) {
+        LOG.info("HTTP 400: {}", ex.getMessage());
+        return ErrorMessageDto.getInstance(ex.getMessage());
+    }
+
+    /**
+     * Handler for {@link LocationException}.
+     *
+     * @return Error message in the payload
+     */
+    @ExceptionHandler(LocationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessageDto handleIllegalState(LocationException ex) {
         LOG.info("HTTP 400: {}", ex.getMessage());
         return ErrorMessageDto.getInstance(ex.getMessage());
     }
@@ -107,7 +119,7 @@ public class ExceptionHandlingAdvice {
     /**
      * Handler for {@link Exception}.
      *
-     * @return
+     * @return Error message in the payload
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

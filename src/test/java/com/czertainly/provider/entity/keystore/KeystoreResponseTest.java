@@ -5,11 +5,7 @@ import com.czertainly.provider.entity.keystore.util.KeystoreResponseUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.security.Provider;
-import java.security.Security;
-import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Set;
 
 public class KeystoreResponseTest {
 
@@ -257,10 +253,6 @@ public class KeystoreResponseTest {
 
     @Test
     public void testCertificateParse() {
-
-        Provider provider = Security.getProvider("SUN");
-        Set<String> x = provider.stringPropertyNames();
-
         List<KeystoreCertificate> certs = KeystoreResponseUtil.getAllKeystoreCertificates(response);
         Assertions.assertEquals(3, certs.size());
     }

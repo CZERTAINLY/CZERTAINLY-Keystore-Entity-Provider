@@ -68,14 +68,13 @@ public class SshServiceImpl implements SshService {
 
 
             } catch (IOException e) {
-                // TODO
-                e.printStackTrace();
-                throw new IllegalStateException("Failed to initialize session.", e);
+                logger.debug("Failed to initiate SSH channel.", e);
+                throw new IllegalStateException("Failed to initiate SSH channel.", e);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.debug("Failed to initiate SSH session.", e);
+            throw new IllegalStateException("Failed to initiate SSH session.", e);
         }
-        return host;
     }
 
     @Override
@@ -102,7 +101,8 @@ public class SshServiceImpl implements SshService {
             client.upload(source, destination);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.debug("Failed to initiate SSH session.", e);
+            throw new IllegalStateException("Failed to initiate SSH session.", e);
         }
     }
 
@@ -130,7 +130,8 @@ public class SshServiceImpl implements SshService {
             client.download(remote, local);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.debug("Failed to initiate SSH session.", e);
+            throw new IllegalStateException("Failed to initiate SSH session.", e);
         }
     }
 }

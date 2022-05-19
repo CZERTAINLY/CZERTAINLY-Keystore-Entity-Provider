@@ -6,8 +6,8 @@ import com.czertainly.api.exception.ValidationException;
 import java.util.Arrays;
 
 public enum AuthenticationType {
-    BASIC("Basic"),
-    SSH("SSH");
+    BASIC("Basic");
+    //SSH("SSH");
 
     private final String method;
 

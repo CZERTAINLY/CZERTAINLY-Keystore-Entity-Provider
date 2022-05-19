@@ -43,9 +43,10 @@ public class SshServiceImpl implements SshService {
         String username = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes);
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
             String password = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes);
-        } else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
-            // TODO
         }
+        //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
+            // TODO
+        //}
 
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
@@ -85,9 +86,10 @@ public class SshServiceImpl implements SshService {
         String username = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes);
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
             String password = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes);
-        } else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
-            // TODO
         }
+        //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
+            // TODO
+        //}
 
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
@@ -114,9 +116,10 @@ public class SshServiceImpl implements SshService {
         String username = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes);
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
             String password = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes);
-        } else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
-            // TODO
         }
+        //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
+            // TODO
+        //}
 
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {

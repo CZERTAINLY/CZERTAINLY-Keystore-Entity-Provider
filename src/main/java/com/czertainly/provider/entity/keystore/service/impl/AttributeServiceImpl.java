@@ -7,12 +7,14 @@ import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.service.AttributeService;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.enums.AuthenticationType;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -47,7 +49,7 @@ public class AttributeServiceImpl implements AttributeService {
             authType.setRequired(true);
             authType.setReadOnly(false);
             authType.setVisible(true);
-            authType.setValue(EnumSet.allOf(AuthenticationType.class));
+            authType.setValue((ArrayList)EnumSet.allOf(AuthenticationType.class).stream().map(AuthenticationType::getCode).collect(Collectors.toList()));
             attrs.add(authType);
 
             AttributeDefinition credential = new AttributeDefinition();
@@ -89,11 +91,11 @@ public class AttributeServiceImpl implements AttributeService {
 
         AttributeDefinitionUtils.validateAttributes(getAttributes(kind), attributes);
 
-        CredentialDto credential = AttributeDefinitionUtils.getCredentialValue(AttributeConstants.ATTRIBUTE_CREDENTIAL, attributes);
-        if (!isCredentialSupported(credential)) {
-            logger.debug("Unsupported authentication type {}", credential.getKind());
-            throw new ValidationException("Unsupported authentication type " + credential.getKind());
-        }
+//        CredentialDto credential = AttributeDefinitionUtils.getCredentialValue(AttributeConstants.ATTRIBUTE_CREDENTIAL, attributes);
+//        if (!isCredentialSupported(credential)) {
+//            logger.debug("Unsupported authentication type {}", credential.getKind());
+//            throw new ValidationException("Unsupported authentication type " + credential.getKind());
+//        }
 
         return true;
     }
@@ -103,8 +105,10 @@ public class AttributeServiceImpl implements AttributeService {
     }
 
     private boolean isCredentialSupported(CredentialDto credential) {
-        if (credential.getKind().equals("Basic")) {
-            return true;
+        if (StringUtils.isNotBlank(credential.getKind())) {
+            if (credential.getKind().equals("Basic")) {
+                return true;
+            }
         }
 
         for (AuthenticationType c : AuthenticationType.values()) {

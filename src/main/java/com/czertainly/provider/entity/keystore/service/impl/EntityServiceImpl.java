@@ -83,8 +83,8 @@ public class EntityServiceImpl implements EntityService {
         instance.setName(request.getName());
         instance.setHost(AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_HOST, request.getAttributes()));
         instance.setAuthenticationType(
-                AuthenticationType.valueOf(
-                        AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes())
+                AuthenticationType.findByCode(
+                    AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes())
                 )
         );
         instance.setUuid(UUID.randomUUID().toString());
@@ -202,9 +202,10 @@ public class EntityServiceImpl implements EntityService {
         String username = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes);
         if (instance.getAuthenticationType().equals(AuthenticationType.BASIC)) {
             String password = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes);
-        } else if (instance.getAuthenticationType().equals(AuthenticationType.SSH)) {
-            // TODO
         }
+        //else if (instance.getAuthenticationType().equals(AuthenticationType.SSH)) {
+            // TODO
+        //}
 
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {

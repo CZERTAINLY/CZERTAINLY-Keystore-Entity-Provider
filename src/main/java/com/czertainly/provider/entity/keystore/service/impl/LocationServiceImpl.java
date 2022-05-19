@@ -4,7 +4,6 @@ import com.czertainly.api.exception.LocationException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.model.common.RequestAttributeDto;
 import com.czertainly.api.model.connector.entity.*;
-import com.czertainly.api.model.connector.v2.CertificateDataResponseDto;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.command.KeystoreCertificate;
@@ -13,7 +12,6 @@ import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
 import com.czertainly.provider.entity.keystore.service.*;
 import com.czertainly.provider.entity.keystore.util.CertificateUtil;
 import com.czertainly.provider.entity.keystore.util.KeystoreResponseUtil;
-import com.czertainly.provider.entity.keystore.util.MetaDefinitions;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,9 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.Provider;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.*;
 
 @Service
@@ -66,19 +62,26 @@ public class LocationServiceImpl implements LocationService {
             throw new LocationException(response);
         }
 
-        List<CertificateDataResponseDto> certificates = new ArrayList<>();
+        List<CertificateLocationDto> certificates = new ArrayList<>();
         // parse the response and get certificates
         List<KeystoreCertificate> certs = KeystoreResponseUtil.getAllKeystoreCertificates(response);
         for (KeystoreCertificate cert : certs) {
-            CertificateDataResponseDto c = new CertificateDataResponseDto();
-            c.setCertificateData(CertificateUtil.getBase64Certificate(cert.getCertificate()));
+            CertificateLocationDto certificateLocationDto = new CertificateLocationDto();
+            certificateLocationDto.setCertificateData(CertificateUtil.getBase64Certificate(cert.getCertificate()));
+
+            if (cert.isKeyEntry()) {
+                certificateLocationDto.setWithKey(true);
+            } else {
+                certificateLocationDto.setWithKey(false);
+            }
 
             Map<String, Object> certificateMeta = new LinkedHashMap<>();
             certificateMeta.put(META_ALIAS, cert.getAlias());
             certificateMeta.put(META_ENTRY_TYPE, cert.isKeyEntry());
-            c.setMeta(MetaDefinitions.serialize(certificateMeta));
 
-            certificates.add(c);
+            certificateLocationDto.setMetadata(certificateMeta);
+
+            certificates.add(certificateLocationDto);
         }
 
         Map<String, Object> locationMeta = new LinkedHashMap<>();

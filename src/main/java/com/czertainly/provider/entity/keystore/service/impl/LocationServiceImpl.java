@@ -21,7 +21,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.*;
 
 @Service
@@ -37,12 +40,20 @@ public class LocationServiceImpl implements LocationService {
     public static final String META_KSP = "keystore.provider";
 
     @Autowired
+    public void setEntityService(EntityService entityService) {
+        this.entityService = entityService;
+    }
+    @Autowired
+    public void setSshService(SshService sshService) {
+        this.sshService = sshService;
+    }
+    @Autowired
+    public void setLocationAttributeService(LocationAttributeService locationAttributeService) {
+        this.locationAttributeService = locationAttributeService;
+    }
+
     private EntityService entityService;
-
-    @Autowired
     private SshService sshService;
-
-    @Autowired
     private LocationAttributeService locationAttributeService;
 
     @Override
@@ -80,6 +91,48 @@ public class LocationServiceImpl implements LocationService {
             certificateMeta.put(META_ENTRY_TYPE, cert.isKeyEntry());
 
             certificateLocationDto.setMetadata(certificateMeta);
+
+            List<RequestAttributeDto> pushAttributes = new ArrayList<>();
+            RequestAttributeDto aliasAttribute = new RequestAttributeDto();
+            aliasAttribute.setName(AttributeConstants.ATTRIBUTE_ALIAS_NAME);
+            aliasAttribute.setValue(cert.getAlias());
+            pushAttributes.add(aliasAttribute);
+
+            certificateLocationDto.setPushAttributes(pushAttributes);
+
+            List<RequestAttributeDto> csrAttributes = new ArrayList<>();
+            if (cert.isKeyEntry()) {
+                RequestAttributeDto subjectDnAttribute = new RequestAttributeDto();
+                subjectDnAttribute.setName(AttributeConstants.ATTRIBUTE_DN_NAME);
+                subjectDnAttribute.setValue(cert.getCertificate().getSubjectDN().toString());
+                csrAttributes.add(subjectDnAttribute);
+
+                PublicKey pubk = cert.getCertificate().getPublicKey();
+                RequestAttributeDto keyAlgorithmAttribute = new RequestAttributeDto();
+                keyAlgorithmAttribute.setName(AttributeConstants.ATTRIBUTE_KEY_ALG_NAME);
+                keyAlgorithmAttribute.setValue(pubk.getAlgorithm());
+                csrAttributes.add(keyAlgorithmAttribute);
+
+                RequestAttributeDto keyLengthAttribute = new RequestAttributeDto();
+                keyLengthAttribute.setName(AttributeConstants.ATTRIBUTE_KEY_SIZE_NAME);
+                if (pubk instanceof RSAPublicKey) {
+                    RSAPublicKey rsaPubk = (RSAPublicKey) pubk;
+                    keyLengthAttribute.setValue(String.valueOf(rsaPubk.getModulus().bitLength()));
+                } else if (pubk instanceof ECPublicKey) {
+                    ECPublicKey ecPubk = (ECPublicKey) pubk;
+                    keyLengthAttribute.setValue(String.valueOf(ecPubk.getParams().getCurve().getField().getFieldSize()));
+                } else {
+                    keyLengthAttribute.setValue("unknown");
+                }
+                csrAttributes.add(keyLengthAttribute);
+
+                RequestAttributeDto signatureAlgorithmAttribute = new RequestAttributeDto();
+                signatureAlgorithmAttribute.setName(AttributeConstants.ATTRIBUTE_SIG_ALG_NAME);
+                signatureAlgorithmAttribute.setValue(cert.getCertificate().getSigAlgName());
+                csrAttributes.add(signatureAlgorithmAttribute);
+            }
+
+            certificateLocationDto.setCsrAttributes(csrAttributes);
 
             certificates.add(certificateLocationDto);
         }

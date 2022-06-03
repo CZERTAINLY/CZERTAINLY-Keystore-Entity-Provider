@@ -42,12 +42,20 @@ public class EntityServiceImpl implements EntityService {
     private static final Map<Long, ClientSession> sessionCache = new ConcurrentHashMap<>();
 
     @Autowired
+    public void setEntityInstanceRepository(EntityInstanceRepository entityInstanceRepository) {
+        this.entityInstanceRepository = entityInstanceRepository;
+    }
+    @Autowired
+    public void setAttributeService(AttributeService attributeService) {
+        this.attributeService = attributeService;
+    }
+    @Autowired
+    public void setSshClient(SshClient sshClient) {
+        this.sshClient = sshClient;
+    }
+
     private EntityInstanceRepository entityInstanceRepository;
-
-    @Autowired
     private AttributeService attributeService;
-
-    @Autowired
     private SshClient sshClient;
 
     @Override

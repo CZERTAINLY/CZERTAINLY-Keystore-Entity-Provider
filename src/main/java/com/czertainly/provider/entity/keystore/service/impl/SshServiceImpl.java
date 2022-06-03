@@ -33,6 +33,10 @@ public class SshServiceImpl implements SshService {
     public static final int SSH_DEFAULT_TIMEOUT = 30;
 
     @Autowired
+    public void setSshClient(SshClient sshClient) {
+        this.sshClient = sshClient;
+    }
+
     SshClient sshClient;
 
     @Override

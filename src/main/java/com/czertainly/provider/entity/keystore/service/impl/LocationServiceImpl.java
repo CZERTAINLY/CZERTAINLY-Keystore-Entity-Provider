@@ -134,6 +134,9 @@ public class LocationServiceImpl implements LocationService {
                 signatureAlgorithmAttribute.setName(AttributeConstants.ATTRIBUTE_SIG_ALG_NAME);
                 signatureAlgorithmAttribute.setValue(cert.getCertificate().getSigAlgName());
                 csrAttributes.add(signatureAlgorithmAttribute);
+
+                // alias include
+                csrAttributes.add(aliasAttribute);
             }
 
             certificateLocationDto.setCsrAttributes(csrAttributes);

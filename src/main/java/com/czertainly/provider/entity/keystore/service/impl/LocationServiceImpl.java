@@ -21,8 +21,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -169,9 +173,18 @@ public class LocationServiceImpl implements LocationService {
 
         String filename = "/tmp/" + generateRandomFilename();
 
+        // let's check we have the certificate as input
+        X509Certificate certificate;
         try {
-            FileUtils.writeByteArrayToFile(new File(filename), Base64.getDecoder().decode(request.getCertificate()));
-        } catch (IOException e) {
+            certificate = CertificateUtil.parseCertificate(request.getCertificate());
+        } catch (CertificateException e) {
+            logger.debug("Failed to parse certificate {}", request.getCertificate());
+            throw new LocationException(e.getMessage());
+        }
+
+        try {
+            FileUtils.writeByteArrayToFile(new File(filename), certificate.getEncoded());
+        } catch (IOException | CertificateEncodingException e) {
             logger.debug("Error when creating the temporary certificate file for push to location {}", keystorePath, e);
             throw new LocationException(e.getMessage());
         }

@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.*;
@@ -121,6 +122,9 @@ public class LocationServiceImpl implements LocationService {
                 } else if (pubk instanceof ECPublicKey) {
                     ECPublicKey ecPubk = (ECPublicKey) pubk;
                     keyLengthAttribute.setValue(String.valueOf(ecPubk.getParams().getCurve().getField().getFieldSize()));
+                } else if (pubk instanceof DSAPublicKey) {
+                    DSAPublicKey dsaPubk = (DSAPublicKey) pubk;
+                    keyLengthAttribute.setValue(String.valueOf(dsaPubk.getParams().getP().bitLength()));
                 } else {
                     keyLengthAttribute.setValue("unknown");
                 }

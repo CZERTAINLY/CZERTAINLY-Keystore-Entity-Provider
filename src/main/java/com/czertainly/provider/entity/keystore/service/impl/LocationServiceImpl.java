@@ -337,6 +337,6 @@ public class LocationServiceImpl implements LocationService {
         SecureRandom random = new SecureRandom();
         byte[] r = new byte[8];
         random.nextBytes(r);
-        return Base64.getEncoder().encodeToString(r);
+        return Base64.getUrlEncoder().encodeToString(r);
     }
 }

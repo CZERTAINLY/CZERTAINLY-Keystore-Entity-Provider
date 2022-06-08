@@ -6,6 +6,7 @@ import com.czertainly.api.model.common.RequestAttributeDto;
 import com.czertainly.api.model.connector.entity.*;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
+import com.czertainly.provider.entity.keystore.aop.TrackExecutionTime;
 import com.czertainly.provider.entity.keystore.command.KeystoreCertificate;
 import com.czertainly.provider.entity.keystore.command.KeytoolCommand;
 import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
@@ -61,6 +62,7 @@ public class LocationServiceImpl implements LocationService {
     private SshService sshService;
     private LocationAttributeService locationAttributeService;
 
+    @TrackExecutionTime
     @Override
     public LocationDetailResponseDto getLocationDetail(String entityUuid, LocationDetailRequestDto request) throws NotFoundException, LocationException {
         EntityInstance entity = entityService.getEntityInstance(entityUuid);
@@ -160,6 +162,7 @@ public class LocationServiceImpl implements LocationService {
         return responseDto;
     }
 
+    @TrackExecutionTime
     @Override
     public PushCertificateResponseDto pushCertificateToLocation(String entityUuid, PushCertificateRequestDto request) throws NotFoundException, LocationException {
         EntityInstance entity = entityService.getEntityInstance(entityUuid);
@@ -224,6 +227,7 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
+    @TrackExecutionTime
     @Override
     public RemoveCertificateResponseDto removeCertificateFromLocation(String entityUuid, RemoveCertificateRequestDto request) throws NotFoundException, LocationException {
         EntityInstance entity = entityService.getEntityInstance(entityUuid);
@@ -260,6 +264,7 @@ public class LocationServiceImpl implements LocationService {
         return responseDto;
     }
 
+    @TrackExecutionTime
     @Override
     public GenerateCsrResponseDto generateCsrLocation(String entityUuid, GenerateCsrRequestDto request) throws NotFoundException, LocationException {
         EntityInstance entity = entityService.getEntityInstance(entityUuid);

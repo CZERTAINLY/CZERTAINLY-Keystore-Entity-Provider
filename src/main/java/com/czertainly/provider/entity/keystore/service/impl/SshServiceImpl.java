@@ -3,6 +3,7 @@ package com.czertainly.provider.entity.keystore.service.impl;
 import com.czertainly.api.model.common.AttributeDefinition;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
+import com.czertainly.provider.entity.keystore.aop.TrackExecutionTime;
 import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
 import com.czertainly.provider.entity.keystore.enums.AuthenticationType;
 import com.czertainly.provider.entity.keystore.service.SshService;
@@ -39,6 +40,7 @@ public class SshServiceImpl implements SshService {
 
     SshClient sshClient;
 
+    @TrackExecutionTime
     @Override
     public String runRemoteCommand(String command, EntityInstance entity) {
         String host = entity.getHost();
@@ -58,6 +60,8 @@ public class SshServiceImpl implements SshService {
             session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes));
             session.auth().verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
+            logger.debug("Executing command on host {}: {}", host, command);
+
             try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
                  ClientChannel channel = session.createChannel(Channel.CHANNEL_EXEC, command)) {
 
@@ -66,6 +70,9 @@ public class SshServiceImpl implements SshService {
                     channel.open().verify(30, TimeUnit.SECONDS);
                     channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), TimeUnit.SECONDS.toMillis(30));
                     String responseString = new String(responseStream.toByteArray());
+
+                    logger.debug("Response from host {}: {}", host, responseString);
+
                     return responseString;
                 } finally {
                     channel.close(false);
@@ -82,6 +89,7 @@ public class SshServiceImpl implements SshService {
         }
     }
 
+    @TrackExecutionTime
     @Override
     public void uploadFile(EntityInstance entity, String source, String destination) {
         String host = entity.getHost();
@@ -104,6 +112,8 @@ public class SshServiceImpl implements SshService {
             ScpClientCreator creator = ScpClientCreator.instance();
             ScpClient client = creator.createScpClient(session);
 
+            logger.debug("Uploading file {} to {} on host {}", source, destination, host);
+
             client.upload(source, destination);
 
         } catch (IOException e) {
@@ -112,6 +122,7 @@ public class SshServiceImpl implements SshService {
         }
     }
 
+    @TrackExecutionTime
     @Override
     public void downloadFile(EntityInstance entity, String remote, String local) {
         String host = entity.getHost();
@@ -133,6 +144,8 @@ public class SshServiceImpl implements SshService {
 
             ScpClientCreator creator = ScpClientCreator.instance();
             ScpClient client = creator.createScpClient(session);
+
+            logger.debug("Downloading file {} from host {} to {}", remote, host, local);
 
             client.download(remote, local);
 

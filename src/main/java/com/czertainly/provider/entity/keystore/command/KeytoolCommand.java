@@ -37,6 +37,7 @@ public class KeytoolCommand {
                 " -keyalg " + keyalg +
                 " -keysize " + keysize +
                 " -sigalg " + sigalg +
+                " -keypass " + keystorePassword +
                 " -dname '" + dname + "'";
     }
 

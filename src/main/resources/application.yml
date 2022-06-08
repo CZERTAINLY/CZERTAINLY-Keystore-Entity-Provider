@@ -29,3 +29,8 @@ management:
       base-path: '/'
       exposure:
         include: health, info
+aspect:
+  enabled: true
+logging:
+  level:
+    com.czertainly: ${CZERTAINLY_LOG_LEVEL:INFO}

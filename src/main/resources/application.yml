@@ -30,7 +30,7 @@ management:
       exposure:
         include: health, info
 aspect:
-  enabled: true
+  enabled: false
 logging:
   level:
     com.czertainly: ${CZERTAINLY_LOG_LEVEL:INFO}

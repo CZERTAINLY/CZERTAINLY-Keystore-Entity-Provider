@@ -10,7 +10,6 @@ spring:
     driver-class-name: 'org.postgresql.Driver'
     auto-commit: false
   flyway:
-    enabled: false # remove before commit
     out-of-order: true
     table: "keystore_schema_history"
     schemas: ${DB_SCHEMA:keystore}
@@ -30,3 +29,8 @@ management:
       base-path: '/'
       exposure:
         include: health, info
+aspect:
+  enabled: false
+logging:
+  level:
+    com.czertainly: ${CZERTAINLY_LOG_LEVEL:INFO}

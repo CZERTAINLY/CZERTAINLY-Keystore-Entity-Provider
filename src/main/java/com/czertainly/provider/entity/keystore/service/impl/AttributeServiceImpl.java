@@ -70,6 +70,8 @@ public class AttributeServiceImpl implements AttributeService {
             credential.setRequired(true);
             credential.setReadOnly(false);
             credential.setVisible(true);
+            credential.setList(true);
+            credential.setMultiSelect(false);
 
             Set<AttributeCallbackMapping> mappings = new HashSet<>();
             mappings.add(new AttributeCallbackMapping(

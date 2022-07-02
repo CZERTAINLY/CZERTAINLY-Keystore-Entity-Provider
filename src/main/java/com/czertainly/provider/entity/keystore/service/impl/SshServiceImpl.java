@@ -1,6 +1,7 @@
 package com.czertainly.provider.entity.keystore.service.impl;
 
-import com.czertainly.api.model.common.AttributeDefinition;
+import com.czertainly.api.model.common.attribute.AttributeDefinition;
+import com.czertainly.api.model.common.attribute.content.BaseAttributeContent;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.aop.TrackExecutionTime;
@@ -46,9 +47,9 @@ public class SshServiceImpl implements SshService {
         String host = entity.getHost();
 
         List<AttributeDefinition> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData());
-        String username = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes);
+        String username = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, BaseAttributeContent.class);
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            String password = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes);
+            String password = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class);
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
             // TODO
@@ -57,7 +58,7 @@ public class SshServiceImpl implements SshService {
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
 
-            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes));
+            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class));
             session.auth().verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
             logger.debug("Executing command on host {}: {}", host, command);
@@ -69,7 +70,7 @@ public class SshServiceImpl implements SshService {
                 try {
                     channel.open().verify(30, TimeUnit.SECONDS);
                     channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), TimeUnit.SECONDS.toMillis(30));
-                    String responseString = new String(responseStream.toByteArray());
+                    String responseString = responseStream.toString();
 
                     logger.debug("Response from host {}: {}", host, responseString);
 
@@ -95,9 +96,9 @@ public class SshServiceImpl implements SshService {
         String host = entity.getHost();
 
         List<AttributeDefinition> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData());
-        String username = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes);
+        String username = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, BaseAttributeContent.class);
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            String password = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes);
+            String password = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class);
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
             // TODO
@@ -106,7 +107,7 @@ public class SshServiceImpl implements SshService {
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
 
-            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes));
+            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class));
             session.auth().verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
             ScpClientCreator creator = ScpClientCreator.instance();
@@ -128,9 +129,9 @@ public class SshServiceImpl implements SshService {
         String host = entity.getHost();
 
         List<AttributeDefinition> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData());
-        String username = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes);
+        String username = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, BaseAttributeContent.class);
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            String password = AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes);
+            String password = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class);
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
             // TODO
@@ -139,7 +140,7 @@ public class SshServiceImpl implements SshService {
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
 
-            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes));
+            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class));
             session.auth().verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
             ScpClientCreator creator = ScpClientCreator.instance();

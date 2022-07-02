@@ -4,8 +4,8 @@ import com.czertainly.api.exception.LocationException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.interfaces.connector.entity.LocationController;
-import com.czertainly.api.model.common.AttributeDefinition;
-import com.czertainly.api.model.common.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.AttributeDefinition;
+import com.czertainly.api.model.common.attribute.RequestAttributeDto;
 import com.czertainly.api.model.connector.entity.*;
 import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
 import com.czertainly.provider.entity.keystore.service.EntityService;
@@ -20,12 +20,20 @@ import java.util.List;
 public class LocationControllerImpl implements LocationController {
 
     @Autowired
+    public void setLocationService(LocationService locationService) {
+        this.locationService = locationService;
+    }
+    @Autowired
+    public void setEntityService(EntityService entityService) {
+        this.entityService = entityService;
+    }
+    @Autowired
+    public void setLocationAttributeService(LocationAttributeService locationAttributeService) {
+        this.locationAttributeService = locationAttributeService;
+    }
+
     LocationService locationService;
-
-    @Autowired
     EntityService entityService;
-
-    @Autowired
     LocationAttributeService locationAttributeService;
 
     @Override

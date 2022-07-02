@@ -1,7 +1,7 @@
 package com.czertainly.provider.entity.keystore.service.impl;
 
-import com.czertainly.api.exception.ValidationException;
-import com.czertainly.api.model.common.*;
+import com.czertainly.api.model.common.attribute.*;
+import com.czertainly.api.model.common.attribute.content.BaseAttributeContent;
 import com.czertainly.api.model.core.credential.CredentialDto;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.service.AttributeService;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,22 +33,32 @@ public class AttributeServiceImpl implements AttributeService {
             host.setName(AttributeConstants.ATTRIBUTE_HOST);
             host.setLabel(AttributeConstants.ATTRIBUTE_HOST_LABEL);
             host.setDescription("Hostname or IP address of the target system");
-            host.setType(BaseAttributeDefinitionTypes.STRING);
+            host.setType(AttributeType.STRING);
             host.setRequired(true);
             host.setReadOnly(false);
             host.setVisible(true);
+            host.setList(false);
+            host.setMultiSelect(false);
             attrs.add(host);
+
+            List<BaseAttributeContent<String>> authTypes = new ArrayList<>();
+            for (AuthenticationType authType : AuthenticationType.values()) {
+                BaseAttributeContent<String> auth = new BaseAttributeContent<>(authType.getCode());
+                authTypes.add(auth);
+            }
 
             AttributeDefinition authType = new AttributeDefinition();
             authType.setUuid("c6d5a3ef-bed6-49c6-ae51-2768026a8052");
             authType.setName(AttributeConstants.ATTRIBUTE_AUTH_TYPE);
             authType.setLabel(AttributeConstants.ATTRIBUTE_AUTH_TYPE_LABEL);
             authType.setDescription("Authentication type to create the Entity instance");
-            authType.setType(BaseAttributeDefinitionTypes.LIST);
+            authType.setType(AttributeType.STRING);
             authType.setRequired(true);
             authType.setReadOnly(false);
             authType.setVisible(true);
-            authType.setValue((ArrayList)EnumSet.allOf(AuthenticationType.class).stream().map(AuthenticationType::getCode).collect(Collectors.toList()));
+            authType.setList(true);
+            authType.setMultiSelect(false);
+            authType.setContent(authTypes);
             attrs.add(authType);
 
             AttributeDefinition credential = new AttributeDefinition();
@@ -57,16 +66,18 @@ public class AttributeServiceImpl implements AttributeService {
             credential.setName(AttributeConstants.ATTRIBUTE_CREDENTIAL);
             credential.setLabel(AttributeConstants.ATTRIBUTE_CREDENTIAL_LABEL);
             credential.setDescription("Credential to authenticate to target server");
-            credential.setType(BaseAttributeDefinitionTypes.CREDENTIAL);
+            credential.setType(AttributeType.CREDENTIAL);
             credential.setRequired(true);
             credential.setReadOnly(false);
             credential.setVisible(true);
+            credential.setList(true);
+            credential.setMultiSelect(false);
 
             Set<AttributeCallbackMapping> mappings = new HashSet<>();
             mappings.add(new AttributeCallbackMapping(
+                    AttributeConstants.ATTRIBUTE_AUTH_TYPE,
                     "credentialKind",
-                    AttributeValueTarget.PATH_VARIABLE,
-                    authType.getValue()));
+                    AttributeValueTarget.PATH_VARIABLE));
 
             AttributeCallback listCredentialCallback = new AttributeCallback();
             listCredentialCallback.setCallbackContext("core/getCredentials");

@@ -4,8 +4,8 @@ import com.czertainly.api.exception.AlreadyExistException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.interfaces.connector.entity.EntityController;
-import com.czertainly.api.model.common.AttributeDefinition;
-import com.czertainly.api.model.common.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.AttributeDefinition;
+import com.czertainly.api.model.common.attribute.RequestAttributeDto;
 import com.czertainly.api.model.connector.entity.EntityInstanceDto;
 import com.czertainly.api.model.connector.entity.EntityInstanceRequestDto;
 import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
@@ -20,9 +20,15 @@ import java.util.List;
 public class EntityControllerImpl implements EntityController {
 
     @Autowired
-    EntityService entityService;
-
+    public void setEntityService(EntityService entityService) {
+        this.entityService = entityService;
+    }
     @Autowired
+    public void setLocationAttributeService(LocationAttributeService locationAttributeService) {
+        this.locationAttributeService = locationAttributeService;
+    }
+
+    EntityService entityService;
     LocationAttributeService locationAttributeService;
 
     @Override

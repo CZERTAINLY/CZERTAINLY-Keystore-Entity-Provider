@@ -73,9 +73,9 @@ public class AttributeServiceImpl implements AttributeService {
 
             Set<AttributeCallbackMapping> mappings = new HashSet<>();
             mappings.add(new AttributeCallbackMapping(
+                    AttributeConstants.ATTRIBUTE_AUTH_TYPE,
                     "credentialKind",
-                    AttributeValueTarget.PATH_VARIABLE,
-                    ((BaseAttributeContent<String>) authType.getContent()).getValue()));
+                    AttributeValueTarget.PATH_VARIABLE));
 
             AttributeCallback listCredentialCallback = new AttributeCallback();
             listCredentialCallback.setCallbackContext("core/getCredentials");

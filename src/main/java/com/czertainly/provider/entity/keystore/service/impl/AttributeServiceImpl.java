@@ -41,10 +41,9 @@ public class AttributeServiceImpl implements AttributeService {
             host.setMultiSelect(false);
             attrs.add(host);
 
-            List<BaseAttributeContent<String>> authTypes = new ArrayList<>();
+            List<String> authTypes = new ArrayList<>();
             for (AuthenticationType authType : AuthenticationType.values()) {
-                BaseAttributeContent<String> auth = new BaseAttributeContent<>(authType.getCode());
-                authTypes.add(auth);
+                authTypes.add(authType.getCode());
             }
 
             AttributeDefinition authType = new AttributeDefinition();

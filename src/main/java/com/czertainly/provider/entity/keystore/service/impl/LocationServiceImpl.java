@@ -230,6 +230,13 @@ public class LocationServiceImpl implements LocationService {
         EntityInstance entity = entityService.getEntityInstance(entityUuid);
         locationAttributeService.validateLocationAttributes(entity, request.getLocationAttributes());
 
+        LocationDetailRequestDto detailRequest = new LocationDetailRequestDto();
+        detailRequest.setLocationAttributes(request.getLocationAttributes());
+        List<CertificateLocationDto> certificatesInLocation = getLocationDetail(entityUuid, detailRequest).getCertificates();
+        if(certificatesInLocation != null && certificatesInLocation.size() == 1) {
+            throw new LocationException("Java keystore cannot be empty.");
+        }
+
         RemoveCertificateResponseDto responseDto = new RemoveCertificateResponseDto();
 
         String alias = (String) request.getCertificateMetadata().get(META_ALIAS);

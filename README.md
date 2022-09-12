@@ -37,12 +37,16 @@ To know more about the `Core`, refer to [CZERTAINLY Core](https://github.com/3Ke
 ### `Entity` attributes
 
 The attributes for creating a new `Entity` includes:
-> TODO
+- Hostname / IP Address of the `Entity`
+- Type of the authentication
+- Credential
 
 ### `Location` attributes
 
 The attributes for creating a new `Location` includes:
-> TODO
+- Keystore Path
+- Keystore Password
+- Keystore Type
 
 ## Interfaces
 
@@ -52,7 +56,7 @@ For more information, please refer to the [CZERTAINLY documentation](https://doc
 
 ## Docker container
 
-Keystore Entity Provider `Connector` is provided as a Docker container. Use the `3keycompany/czertainly-keystore-entity-provider:tagname` to pull the required image from the repository. It can be configured using the following environment variables:
+Keystore Entity Provider `Connector` is provided as a Docker container. Use the `docker pull harbor.3key.company/czertainly/czertainly-keystore-entity-provider:tagname` to pull the required image from the repository. It can be configured using the following environment variables:
 
 | Variable | Description | Required | Default value |
 | --- | --- | --- | --- |

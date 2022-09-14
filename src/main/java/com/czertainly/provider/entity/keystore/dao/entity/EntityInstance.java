@@ -1,13 +1,16 @@
 package com.czertainly.provider.entity.keystore.dao.entity;
 
 import com.czertainly.api.model.connector.entity.EntityInstanceDto;
+import com.czertainly.api.model.core.credential.CredentialDto;
 import com.czertainly.core.util.AttributeDefinitionUtils;
+import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.enums.AuthenticationType;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 @Entity
 @Table(name = "entity_instance")

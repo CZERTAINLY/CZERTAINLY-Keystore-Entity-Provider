@@ -2,6 +2,7 @@ package com.czertainly.provider.entity.keystore.service.impl;
 
 import com.czertainly.api.model.common.attribute.*;
 import com.czertainly.api.model.common.attribute.content.BaseAttributeContent;
+import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.model.core.credential.CredentialDto;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.service.AttributeService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional

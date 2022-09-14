@@ -2,11 +2,14 @@ package com.czertainly.provider.entity.keystore.api;
 
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.interfaces.connector.AttributesController;
-import com.czertainly.api.model.common.AttributeDefinition;
-import com.czertainly.api.model.common.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.AttributeDefinition;
+import com.czertainly.api.model.common.attribute.RequestAttributeDto;
 import com.czertainly.provider.entity.keystore.service.AttributeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -15,6 +18,10 @@ import java.util.List;
 public class AttributesControllerImpl implements AttributesController {
 
     @Autowired
+    public void setAttributeService(AttributeService attributeService) {
+        this.attributeService = attributeService;
+    }
+
     private AttributeService attributeService;
 
     @Override

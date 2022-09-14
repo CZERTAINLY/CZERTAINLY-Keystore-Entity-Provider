@@ -2,8 +2,8 @@ package com.czertainly.provider.entity.keystore.service;
 
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.exception.ValidationException;
-import com.czertainly.api.model.common.AttributeDefinition;
-import com.czertainly.api.model.common.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.AttributeDefinition;
+import com.czertainly.api.model.common.attribute.RequestAttributeDto;
 import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
 
 import java.util.List;

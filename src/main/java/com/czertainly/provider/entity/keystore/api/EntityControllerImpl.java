@@ -31,9 +31,6 @@ public class EntityControllerImpl implements EntityController {
     EntityService entityService;
     LocationAttributeService locationAttributeService;
 
-    @Autowired
-    LocationAttributeService locationAttributeService;
-
     @Override
     public List<EntityInstanceDto> listEntityInstances() {
         return entityService.listEntityInstances();

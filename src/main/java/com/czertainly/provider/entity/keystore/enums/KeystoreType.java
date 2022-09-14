@@ -3,7 +3,7 @@ package com.czertainly.provider.entity.keystore.enums;
 import com.czertainly.api.exception.ValidationError;
 import com.czertainly.api.exception.ValidationException;
 
-import java.util.*;
+import java.util.Arrays;
 
 public enum KeystoreType {
     JKS("JKS"),

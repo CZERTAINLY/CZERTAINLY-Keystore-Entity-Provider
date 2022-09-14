@@ -73,7 +73,7 @@ public class SshServiceImpl implements SshService {
                     String responseString = responseStream.toString();
 
                     logger.debug("Response from host {}: {}", host, responseString);
-
+                    
                     return responseString;
                 } finally {
                     channel.close(false);
@@ -147,7 +147,7 @@ public class SshServiceImpl implements SshService {
             ScpClient client = creator.createScpClient(session);
 
             logger.debug("Downloading file {} from host {} to {}", remote, host, local);
-
+            
             client.download(remote, local);
 
         } catch (IOException e) {

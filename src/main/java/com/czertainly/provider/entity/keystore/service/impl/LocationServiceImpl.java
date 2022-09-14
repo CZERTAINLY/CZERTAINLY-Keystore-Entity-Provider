@@ -12,7 +12,10 @@ import com.czertainly.provider.entity.keystore.aop.TrackExecutionTime;
 import com.czertainly.provider.entity.keystore.command.KeystoreCertificate;
 import com.czertainly.provider.entity.keystore.command.KeytoolCommand;
 import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
-import com.czertainly.provider.entity.keystore.service.*;
+import com.czertainly.provider.entity.keystore.service.EntityService;
+import com.czertainly.provider.entity.keystore.service.LocationAttributeService;
+import com.czertainly.provider.entity.keystore.service.LocationService;
+import com.czertainly.provider.entity.keystore.service.SshService;
 import com.czertainly.provider.entity.keystore.util.CertificateUtil;
 import com.czertainly.provider.entity.keystore.util.KeystoreResponseUtil;
 import org.apache.commons.io.FileUtils;
@@ -32,7 +35,11 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class LocationServiceImpl implements LocationService {

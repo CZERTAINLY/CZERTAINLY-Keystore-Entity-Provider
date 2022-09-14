@@ -1,19 +1,27 @@
 package com.czertainly.provider.entity.keystore.service.impl;
 
-import com.czertainly.api.model.common.attribute.*;
+import com.czertainly.api.model.common.attribute.AttributeCallback;
+import com.czertainly.api.model.common.attribute.AttributeCallbackMapping;
+import com.czertainly.api.model.common.attribute.AttributeDefinition;
+import com.czertainly.api.model.common.attribute.AttributeType;
+import com.czertainly.api.model.common.attribute.AttributeValueTarget;
+import com.czertainly.api.model.common.attribute.RequestAttributeDto;
 import com.czertainly.api.model.common.attribute.content.BaseAttributeContent;
 import com.czertainly.api.model.core.credential.CredentialDto;
-import com.czertainly.provider.entity.keystore.AttributeConstants;
-import com.czertainly.provider.entity.keystore.service.AttributeService;
 import com.czertainly.core.util.AttributeDefinitionUtils;
+import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.enums.AuthenticationType;
+import com.czertainly.provider.entity.keystore.service.AttributeService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional

@@ -48,7 +48,6 @@ public class LocationServiceImpl implements LocationService {
     public static final String META_ENTRY_TYPE = "keystore.containsKey";
     public static final String META_KSP = "keystore.provider";
     private static final String KEYTOOL_ERROR_PREFIX = "keytool error:";
-    private static final String ALIAS_EXTENSION_NAME = "_czertainly_renewal_item";
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private EntityService entityService;
     private SshService sshService;

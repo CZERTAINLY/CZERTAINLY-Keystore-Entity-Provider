@@ -44,31 +44,29 @@ import java.util.Map;
 @Service
 public class LocationServiceImpl implements LocationService {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    private static final String KEYTOOL_ERROR_PREFIX = "keytool error:";
-
     public static final String META_ALIAS = "keystore.alias";
     public static final String META_ENTRY_TYPE = "keystore.containsKey";
-
     public static final String META_KSP = "keystore.provider";
+    private static final String KEYTOOL_ERROR_PREFIX = "keytool error:";
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private EntityService entityService;
+    private SshService sshService;
+    private LocationAttributeService locationAttributeService;
 
     @Autowired
     public void setEntityService(EntityService entityService) {
         this.entityService = entityService;
     }
+
     @Autowired
     public void setSshService(SshService sshService) {
         this.sshService = sshService;
     }
+
     @Autowired
     public void setLocationAttributeService(LocationAttributeService locationAttributeService) {
         this.locationAttributeService = locationAttributeService;
     }
-
-    private EntityService entityService;
-    private SshService sshService;
-    private LocationAttributeService locationAttributeService;
 
     @TrackExecutionTime
     @Override
@@ -178,6 +176,13 @@ public class LocationServiceImpl implements LocationService {
         String keystorePassword = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), BaseAttributeContent.class);
         String keystoreType = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), BaseAttributeContent.class);
 
+        PushCertificateResponseDto responseDto = new PushCertificateResponseDto();
+
+        Map<String, Object> meta = new LinkedHashMap<>();
+        meta.put(META_ALIAS, alias);
+
+        responseDto.setCertificateMetadata(meta);
+
         String filename = "/tmp/" + generateRandomFilename();
 
         // let's check we have the certificate as input
@@ -209,13 +214,6 @@ public class LocationServiceImpl implements LocationService {
                 throw new LocationException(response);
             }
 
-            PushCertificateResponseDto responseDto = new PushCertificateResponseDto();
-
-            Map<String, Object> meta = new LinkedHashMap<>();
-            meta.put(META_ALIAS, alias);
-
-            responseDto.setCertificateMetadata(meta);
-
             return responseDto;
 
         } finally {
@@ -240,13 +238,14 @@ public class LocationServiceImpl implements LocationService {
         LocationDetailRequestDto detailRequest = new LocationDetailRequestDto();
         detailRequest.setLocationAttributes(request.getLocationAttributes());
         List<CertificateLocationDto> certificatesInLocation = getLocationDetail(entityUuid, detailRequest).getCertificates();
-        if(certificatesInLocation != null && certificatesInLocation.size() == 1) {
+        if (certificatesInLocation != null && certificatesInLocation.size() == 1) {
             throw new LocationException("Java keystore cannot be empty.");
         }
 
         RemoveCertificateResponseDto responseDto = new RemoveCertificateResponseDto();
 
         String alias = (String) request.getCertificateMetadata().get(META_ALIAS);
+
         if (!StringUtils.isNotBlank(alias)) {
             String message = "Alias not found in the certificate metadata for Entity " + entityUuid + ". Nothing to remove";
             logger.info(message);
@@ -293,14 +292,18 @@ public class LocationServiceImpl implements LocationService {
 
         // TODO: validation of the attribute values
 
-        String response = sshService.runRemoteCommand(
-                KeytoolCommand.prepareKeytoolGenerateKeyPairCommand(keystorePath, keystoreType, keystorePassword,
-                        alias, keyalg, keysize, sigalg, dname),
-                entity);
+        String response;
+        if (!request.isRenewal()) {
 
-        if (response.startsWith(KEYTOOL_ERROR_PREFIX)) {
-            logger.info("Failed to generate new key pair for alias {} from Keystore {} for Entity {}", alias, keystorePath, entityUuid);
-            throw new LocationException(response);
+            response = sshService.runRemoteCommand(
+                    KeytoolCommand.prepareKeytoolGenerateKeyPairCommand(keystorePath, keystoreType, keystorePassword,
+                            alias, keyalg, keysize, sigalg, dname),
+                    entity);
+
+            if (response.startsWith(KEYTOOL_ERROR_PREFIX)) {
+                logger.info("Failed to generate new key pair for alias {} from Keystore {} for Entity {}", alias, keystorePath, entityUuid);
+                throw new LocationException(response);
+            }
         }
 
         String filename = "/tmp/" + generateRandomFilename();
@@ -330,6 +333,12 @@ public class LocationServiceImpl implements LocationService {
             pushAttributes.add(aliasRequestAttribute);
 
             responseDto.setPushAttributes(pushAttributes);
+
+            Map<String, Object> certificateMeta = new LinkedHashMap<>();
+            certificateMeta.put(META_ALIAS, alias);
+            certificateMeta.put(META_ENTRY_TYPE, true);
+
+            responseDto.setMetadata(certificateMeta);
 
             return responseDto;
 

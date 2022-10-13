@@ -226,7 +226,7 @@ public class EntityServiceImpl implements EntityService {
 
         } catch (IOException e) {
             // TODO
-            e.printStackTrace();
+            logger.error(e.getMessage());
             throw new IllegalStateException("Failed to initialize session.", e);
         }
     }

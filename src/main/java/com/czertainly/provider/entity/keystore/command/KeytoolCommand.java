@@ -9,6 +9,14 @@ public class KeytoolCommand {
                 " -storepass " + keystorePassword;
     }
 
+    public static String prepareKeytoolDetailCommand(String keystorePath, String keystoreType, String keystorePassword, String alias) {
+        return "keytool -list -rfc" +
+                " -keystore " + keystorePath +
+                " -storetype " + keystoreType +
+                " -storepass " + keystorePassword +
+                " -alias " + alias;
+    }
+
     public static String prepareKeytoolPushCertificateCommand(String keystorePath, String keystoreType, String keystorePassword, String certificateFilePath, String alias) {
         return "keytool -importcert" +
                 " -keystore " + keystorePath +

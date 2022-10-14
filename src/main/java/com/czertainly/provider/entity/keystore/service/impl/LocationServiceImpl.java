@@ -214,6 +214,16 @@ public class LocationServiceImpl implements LocationService {
                 throw new LocationException(response);
             }
 
+            String updResponse = sshService.runRemoteCommand(KeytoolCommand.prepareKeytoolDetailCommand(keystorePath, keystoreType, keystorePassword, alias), entity);
+            List<KeystoreCertificate> certs = KeystoreResponseUtil.getAllKeystoreCertificates(updResponse);
+            if(certs.isEmpty()){
+                throw new LocationException(response);
+            } else {
+                meta.put(META_ENTRY_TYPE, certs.get(0).isKeyEntry());
+                responseDto.setCertificateMetadata(meta);
+                responseDto.setWithKey(certs.get(0).isKeyEntry());
+            }
+
             return responseDto;
 
         } finally {

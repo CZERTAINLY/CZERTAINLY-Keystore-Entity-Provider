@@ -58,9 +58,13 @@ public class KeystoreResponseUtil {
 
                 try {
                     X509Certificate certificate = CertificateUtil.parseCertificate(rfcCert);
-                    if (x > 0) {
-                        certs.add(new KeystoreCertificate(certificate, false, aliasName));
-                    } else {
+                     /**x==0 implies that we get the end entity certificate. In the JKS, if there are more than 1 trusted
+                      * ca cert, then the end entities are automatically added with their respective chain when displayed.
+                      * So it is important to take only the first certificate and add it to the list. Chains will be ignored
+                      * during this step. But Since the ca certs are also part of the trustedCertEntry entity, it will be added
+                      * when the code sees the data.
+                     */
+                    if (x == 0) {
                         certs.add(new KeystoreCertificate(certificate, entryType.equals(PRIVATE_KEY_ENTRY), aliasName));
                     }
                 } catch (CertificateException e) {

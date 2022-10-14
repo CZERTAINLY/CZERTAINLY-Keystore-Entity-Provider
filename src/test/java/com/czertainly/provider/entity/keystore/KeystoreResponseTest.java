@@ -260,6 +260,6 @@ public class KeystoreResponseTest {
     @Test
     public void testCertificateParseWithChain() {
         List<KeystoreCertificate> certs = KeystoreResponseUtil.getAllKeystoreCertificates(responseWithChain);
-        Assertions.assertEquals(3, certs.size());
+        Assertions.assertEquals(2, certs.size());
     }
 }

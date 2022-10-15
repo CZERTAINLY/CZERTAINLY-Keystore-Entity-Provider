@@ -136,7 +136,7 @@ public class EntityServiceImpl implements EntityService {
 
         instance.setName(request.getName());
         instance.setHost(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_HOST, request.getAttributes(), BaseAttributeContent.class));
-        instance.setAuthenticationType(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes(), BaseAttributeContent.class));
+        instance.setAuthenticationType(AuthenticationType.findByCode(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes(), BaseAttributeContent.class)));
         CredentialDto credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
         instance.setCredentialUuid(credential.getUuid());
         instance.setCredentialData(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.responseAttributeConverter(credential.getAttributes())));
@@ -226,7 +226,7 @@ public class EntityServiceImpl implements EntityService {
 
         } catch (IOException e) {
             // TODO
-            e.printStackTrace();
+            logger.error(e.getMessage());
             throw new IllegalStateException("Failed to initialize session.", e);
         }
     }

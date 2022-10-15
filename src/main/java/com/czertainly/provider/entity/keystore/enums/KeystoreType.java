@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public enum KeystoreType {
     JKS("JKS"),
-    PKCS12("PCKS#12");
+    PKCS12("PKCS12");
 
     private final String method;
 

@@ -43,7 +43,7 @@ public class SshServiceImpl implements SshService {
 
     @TrackExecutionTime
     @Override
-    public String runRemoteCommand(String command, EntityInstance entity) {
+    public synchronized String runRemoteCommand(String command, EntityInstance entity) {
         String host = entity.getHost();
 
         List<AttributeDefinition> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData());

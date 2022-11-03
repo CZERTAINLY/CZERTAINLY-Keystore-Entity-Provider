@@ -1,5 +1,6 @@
 package com.czertainly.provider.entity.keystore.dao.entity;
 
+import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
 import com.czertainly.api.model.connector.entity.EntityInstanceDto;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.enums.AuthenticationType;
@@ -108,7 +109,7 @@ public class EntityInstance {
         dto.setName(this.name);
 
         if (attributes != null) {
-            dto.setAttributes(AttributeDefinitionUtils.deserialize(attributes));
+            dto.setAttributes(AttributeDefinitionUtils.deserialize(attributes, BaseAttribute.class));
         }
 
         return dto;

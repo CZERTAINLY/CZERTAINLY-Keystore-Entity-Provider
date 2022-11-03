@@ -22,6 +22,7 @@ public class V202211031300__AttributeV2Changes extends BaseJavaMigration {
 
     private static final String ATTRIBUTE_COLUMN_NAME = "attributes";
     private static final String CREDENTIAL_COLUMN_NAME = "credential_data";
+    private static final String UNIQUE_IDENTIFIER = "id";
 
     @Override
     public Integer getChecksum() {
@@ -37,9 +38,9 @@ public class V202211031300__AttributeV2Changes extends BaseJavaMigration {
     private void applyKeyStoreMigration(Context context) throws Exception {
         try (Statement select = context.getConnection().createStatement()) {
             try (ResultSet rows = select.executeQuery("SELECT id, attributes FROM entity_instance ORDER BY id")) {
-                List<String> migrationCommands = V2AttributeMigrationUtils.getMigrationCommands(rows, ENTITY_INSTANCE_TABLE_NAME, ATTRIBUTE_COLUMN_NAME);
+                List<String> migrationCommands = V2AttributeMigrationUtils.getMigrationCommands(rows, ENTITY_INSTANCE_TABLE_NAME, ATTRIBUTE_COLUMN_NAME, UNIQUE_IDENTIFIER);
                 ResultSet credentialRows = select.executeQuery("SELECT id, credential_data FROM entity_instance ORDER BY id");
-                List<String> credentialMigrationCommands = V2AttributeMigrationUtils.getMigrationCommands(credentialRows, ENTITY_INSTANCE_TABLE_NAME, CREDENTIAL_COLUMN_NAME);
+                List<String> credentialMigrationCommands = V2AttributeMigrationUtils.getMigrationCommands(credentialRows, ENTITY_INSTANCE_TABLE_NAME, CREDENTIAL_COLUMN_NAME, UNIQUE_IDENTIFIER);
                 executeCommands(select, migrationCommands);
                 executeCommands(select, credentialMigrationCommands);
             }

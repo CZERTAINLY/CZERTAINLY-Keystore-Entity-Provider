@@ -4,7 +4,7 @@ package com.czertainly.provider.entity.keystore.enums;
  * Stores the checksum of a Java-based migration.
  */
 public enum JavaMigrationChecksums {
-    V202211031300__AttributeV2Changes(-1110999615);
+    V202211031300__AttributeV2Changes(349471228);
     private final int checksum;
 
     JavaMigrationChecksums(int checksum) {

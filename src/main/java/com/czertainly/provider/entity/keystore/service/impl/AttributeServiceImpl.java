@@ -1,7 +1,7 @@
 package com.czertainly.provider.entity.keystore.service.impl;
 
 import com.czertainly.api.model.client.attribute.RequestAttributeDto;
-import com.czertainly.api.model.common.attribute.v2.AttributeProperties;
+import com.czertainly.api.model.common.attribute.v2.DataAttributeProperties;
 import com.czertainly.api.model.common.attribute.v2.AttributeType;
 import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
 import com.czertainly.api.model.common.attribute.v2.DataAttribute;
@@ -46,13 +46,13 @@ public class AttributeServiceImpl implements AttributeService {
             host.setDescription("Hostname or IP address of the target system");
             host.setType(AttributeType.DATA);
             host.setContentType(AttributeContentType.STRING);
-            AttributeProperties hostProperties = new AttributeProperties();
+            DataAttributeProperties hostProperties = new DataAttributeProperties();
             hostProperties.setLabel(AttributeConstants.ATTRIBUTE_HOST_LABEL);
             hostProperties.setRequired(true);
             hostProperties.setReadOnly(false);
             hostProperties.setVisible(true);
             hostProperties.setList(false);
-            hostProperties.setMulti(false);
+            hostProperties.setMultiSelect(false);
             host.setProperties(hostProperties);
             attrs.add(host);
 
@@ -68,13 +68,13 @@ public class AttributeServiceImpl implements AttributeService {
             authType.setDescription("Authentication type to create the Entity instance");
             authType.setType(AttributeType.DATA);
             authType.setContentType(AttributeContentType.STRING);
-            AttributeProperties authTypeProperties = new AttributeProperties();
+            DataAttributeProperties authTypeProperties = new DataAttributeProperties();
             authTypeProperties.setLabel(AttributeConstants.ATTRIBUTE_AUTH_TYPE_LABEL);
             authTypeProperties.setRequired(true);
             authTypeProperties.setReadOnly(false);
             authTypeProperties.setVisible(true);
             authTypeProperties.setList(true);
-            authTypeProperties.setMulti(false);
+            authTypeProperties.setMultiSelect(false);
             authType.setProperties(authTypeProperties);
             authType.setContent(authTypes);
             attrs.add(authType);
@@ -85,13 +85,13 @@ public class AttributeServiceImpl implements AttributeService {
             credential.setDescription("Credential to authenticate to target server");
             credential.setType(AttributeType.DATA);
             credential.setContentType(AttributeContentType.CREDENTIAL);
-            AttributeProperties credentialProperties = new AttributeProperties();
+            DataAttributeProperties credentialProperties = new DataAttributeProperties();
             credentialProperties.setLabel(AttributeConstants.ATTRIBUTE_CREDENTIAL_LABEL);
             credentialProperties.setRequired(true);
             credentialProperties.setReadOnly(false);
             credentialProperties.setVisible(true);
             credentialProperties.setList(true);
-            credentialProperties.setMulti(false);
+            credentialProperties.setMultiSelect(false);
             credential.setProperties(credentialProperties);
 
             Set<AttributeCallbackMapping> mappings = new HashSet<>();

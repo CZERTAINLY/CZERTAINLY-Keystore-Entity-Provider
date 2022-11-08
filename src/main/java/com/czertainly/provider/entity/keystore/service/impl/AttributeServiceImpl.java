@@ -1,12 +1,16 @@
 package com.czertainly.provider.entity.keystore.service.impl;
 
-import com.czertainly.api.model.common.attribute.AttributeCallback;
-import com.czertainly.api.model.common.attribute.AttributeCallbackMapping;
-import com.czertainly.api.model.common.attribute.AttributeDefinition;
-import com.czertainly.api.model.common.attribute.AttributeType;
-import com.czertainly.api.model.common.attribute.AttributeValueTarget;
-import com.czertainly.api.model.common.attribute.RequestAttributeDto;
-import com.czertainly.api.model.common.attribute.content.BaseAttributeContent;
+import com.czertainly.api.model.client.attribute.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.v2.DataAttributeProperties;
+import com.czertainly.api.model.common.attribute.v2.AttributeType;
+import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
+import com.czertainly.api.model.common.attribute.v2.DataAttribute;
+import com.czertainly.api.model.common.attribute.v2.callback.AttributeCallback;
+import com.czertainly.api.model.common.attribute.v2.callback.AttributeCallbackMapping;
+import com.czertainly.api.model.common.attribute.v2.callback.AttributeValueTarget;
+import com.czertainly.api.model.common.attribute.v2.content.AttributeContentType;
+import com.czertainly.api.model.common.attribute.v2.content.BaseAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
 import com.czertainly.api.model.core.credential.CredentialDto;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
@@ -29,57 +33,66 @@ public class AttributeServiceImpl implements AttributeService {
     private static final Logger logger = LoggerFactory.getLogger(AttributeServiceImpl.class);
 
     @Override
-    public List<AttributeDefinition> getAttributes(String kind) {
+    public List<BaseAttribute> getAttributes(String kind) {
 
         logger.info("Getting the Attributes for {}", kind);
 
         if (isKindSupported(kind)) {
-            List<AttributeDefinition> attrs = new ArrayList<>();
+            List<BaseAttribute> attrs = new ArrayList<>();
 
-            AttributeDefinition host = new AttributeDefinition();
+            DataAttribute host = new DataAttribute();
             host.setUuid("5e9146a6-da8a-403f-99cb-d5d64d93ce1c");
             host.setName(AttributeConstants.ATTRIBUTE_HOST);
-            host.setLabel(AttributeConstants.ATTRIBUTE_HOST_LABEL);
             host.setDescription("Hostname or IP address of the target system");
-            host.setType(AttributeType.STRING);
-            host.setRequired(true);
-            host.setReadOnly(false);
-            host.setVisible(true);
-            host.setList(false);
-            host.setMultiSelect(false);
+            host.setType(AttributeType.DATA);
+            host.setContentType(AttributeContentType.STRING);
+            DataAttributeProperties hostProperties = new DataAttributeProperties();
+            hostProperties.setLabel(AttributeConstants.ATTRIBUTE_HOST_LABEL);
+            hostProperties.setRequired(true);
+            hostProperties.setReadOnly(false);
+            hostProperties.setVisible(true);
+            hostProperties.setList(false);
+            hostProperties.setMultiSelect(false);
+            host.setProperties(hostProperties);
             attrs.add(host);
 
-            List<BaseAttributeContent<String>> authTypes = new ArrayList<>();
+            List<BaseAttributeContent> authTypes = new ArrayList<>();
             for (AuthenticationType authType : AuthenticationType.values()) {
-                BaseAttributeContent<String> auth = new BaseAttributeContent<>(authType.getCode());
+                StringAttributeContent auth = new StringAttributeContent(authType.getCode());
                 authTypes.add(auth);
             }
 
-            AttributeDefinition authType = new AttributeDefinition();
+            DataAttribute authType = new DataAttribute();
             authType.setUuid("c6d5a3ef-bed6-49c6-ae51-2768026a8052");
             authType.setName(AttributeConstants.ATTRIBUTE_AUTH_TYPE);
-            authType.setLabel(AttributeConstants.ATTRIBUTE_AUTH_TYPE_LABEL);
             authType.setDescription("Authentication type to create the Entity instance");
-            authType.setType(AttributeType.STRING);
-            authType.setRequired(true);
-            authType.setReadOnly(false);
-            authType.setVisible(true);
-            authType.setList(true);
-            authType.setMultiSelect(false);
+            authType.setType(AttributeType.DATA);
+            authType.setContentType(AttributeContentType.STRING);
+            DataAttributeProperties authTypeProperties = new DataAttributeProperties();
+            authTypeProperties.setLabel(AttributeConstants.ATTRIBUTE_AUTH_TYPE_LABEL);
+            authTypeProperties.setRequired(true);
+            authTypeProperties.setReadOnly(false);
+            authTypeProperties.setVisible(true);
+            authTypeProperties.setList(true);
+            authTypeProperties.setMultiSelect(false);
+            authType.setProperties(authTypeProperties);
             authType.setContent(authTypes);
             attrs.add(authType);
 
-            AttributeDefinition credential = new AttributeDefinition();
+            DataAttribute credential = new DataAttribute();
             credential.setUuid("931073c0-0765-4e6d-904e-8b6364bb66ec");
             credential.setName(AttributeConstants.ATTRIBUTE_CREDENTIAL);
-            credential.setLabel(AttributeConstants.ATTRIBUTE_CREDENTIAL_LABEL);
             credential.setDescription("Credential to authenticate to target server");
-            credential.setType(AttributeType.CREDENTIAL);
-            credential.setRequired(true);
-            credential.setReadOnly(false);
-            credential.setVisible(true);
-            credential.setList(true);
-            credential.setMultiSelect(false);
+            credential.setType(AttributeType.DATA);
+            credential.setContentType(AttributeContentType.CREDENTIAL);
+            DataAttributeProperties credentialProperties = new DataAttributeProperties();
+            credentialProperties.setLabel(AttributeConstants.ATTRIBUTE_CREDENTIAL_LABEL);
+            credentialProperties.setRequired(true);
+            credentialProperties.setReadOnly(false);
+            credentialProperties.setVisible(true);
+            credentialProperties.setList(true);
+            credentialProperties.setMultiSelect(false);
+            credential.setProperties(credentialProperties);
 
             Set<AttributeCallbackMapping> mappings = new HashSet<>();
             mappings.add(new AttributeCallbackMapping(

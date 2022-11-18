@@ -3,7 +3,12 @@ package com.czertainly.provider.entity.keystore.service.impl;
 import com.czertainly.api.exception.LocationException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.model.client.attribute.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.v2.AttributeType;
 import com.czertainly.api.model.common.attribute.v2.DataAttribute;
+import com.czertainly.api.model.common.attribute.v2.InfoAttribute;
+import com.czertainly.api.model.common.attribute.v2.InfoAttributeProperties;
+import com.czertainly.api.model.common.attribute.v2.content.AttributeContentType;
+import com.czertainly.api.model.common.attribute.v2.content.BooleanAttributeContent;
 import com.czertainly.api.model.common.attribute.v2.content.SecretAttributeContent;
 import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
 import com.czertainly.api.model.connector.entity.*;
@@ -38,9 +43,8 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class LocationServiceImpl implements LocationService {
@@ -96,9 +100,7 @@ public class LocationServiceImpl implements LocationService {
 
             certificateLocationDto.setWithKey(cert.isKeyEntry());
 
-            Map<String, Object> certificateMeta = new LinkedHashMap<>();
-            certificateMeta.put(META_ALIAS, cert.getAlias());
-            certificateMeta.put(META_ENTRY_TYPE, cert.isKeyEntry());
+            List<InfoAttribute> certificateMeta = List.of(getAliasMetadata(cert.getAlias()), getEntryTypeMetadata(cert.isKeyEntry()));
 
             certificateLocationDto.setMetadata(certificateMeta);
 
@@ -153,14 +155,11 @@ public class LocationServiceImpl implements LocationService {
             certificates.add(certificateLocationDto);
         }
 
-        Map<String, Object> locationMeta = new LinkedHashMap<>();
-        locationMeta.put(META_KSP, KeystoreResponseUtil.getKeystoreProvider(response));
-
         LocationDetailResponseDto responseDto = new LocationDetailResponseDto();
         responseDto.setMultipleEntries(true);
         responseDto.setSupportKeyManagement(true);
         responseDto.setCertificates(certificates);
-        responseDto.setMetadata(locationMeta);
+        responseDto.setMetadata(List.of(getKspMetadata(KeystoreResponseUtil.getKeystoreProvider(response))));
 
         return responseDto;
     }
@@ -179,10 +178,7 @@ public class LocationServiceImpl implements LocationService {
 
         PushCertificateResponseDto responseDto = new PushCertificateResponseDto();
 
-        Map<String, Object> meta = new LinkedHashMap<>();
-        meta.put(META_ALIAS, alias);
-
-        responseDto.setCertificateMetadata(meta);
+        responseDto.setCertificateMetadata(List.of(getAliasMetadata(alias)));
 
         String filename = "/tmp/" + generateRandomFilename();
 
@@ -220,8 +216,7 @@ public class LocationServiceImpl implements LocationService {
             if (certs.isEmpty()) {
                 throw new LocationException(response);
             } else {
-                meta.put(META_ENTRY_TYPE, certs.get(0).isKeyEntry());
-                responseDto.setCertificateMetadata(meta);
+                responseDto.setCertificateMetadata(List.of(getEntryTypeMetadata(certs.get(0).isKeyEntry())));
                 responseDto.setWithKey(certs.get(0).isKeyEntry());
             }
 
@@ -255,7 +250,7 @@ public class LocationServiceImpl implements LocationService {
 
         RemoveCertificateResponseDto responseDto = new RemoveCertificateResponseDto();
 
-        String alias = (String) request.getCertificateMetadata().get(META_ALIAS);
+        String alias = AttributeDefinitionUtils.getSingleItemAttributeContentValue(META_ALIAS, request.getCertificateMetadata(), StringAttributeContent.class).getData();
 
         if (!StringUtils.isNotBlank(alias)) {
             String message = "Alias not found in the certificate metadata for Entity " + entityUuid + ". Nothing to remove";
@@ -278,9 +273,7 @@ public class LocationServiceImpl implements LocationService {
             throw new LocationException(response);
         }
 
-        Map<String, Object> meta = request.getCertificateMetadata();
-        meta.remove(META_ALIAS);
-        responseDto.setCertificateMetadata(meta);
+        responseDto.setCertificateMetadata(request.getCertificateMetadata().stream().filter(e -> !entity.getName().equals(META_ALIAS)).collect(Collectors.toList()));
 
         return responseDto;
     }
@@ -345,10 +338,7 @@ public class LocationServiceImpl implements LocationService {
 
             responseDto.setPushAttributes(pushAttributes);
 
-            Map<String, Object> certificateMeta = new LinkedHashMap<>();
-            certificateMeta.put(META_ALIAS, alias);
-            certificateMeta.put(META_ENTRY_TYPE, true);
-
+            List<InfoAttribute> certificateMeta = List.of(getAliasMetadata(alias), getEntryTypeMetadata(true));
             responseDto.setMetadata(certificateMeta);
 
             return responseDto;
@@ -374,5 +364,62 @@ public class LocationServiceImpl implements LocationService {
         byte[] r = new byte[8];
         random.nextBytes(r);
         return Base64.getUrlEncoder().encodeToString(r);
+    }
+
+    private InfoAttribute getAliasMetadata(String alias) {
+        //Alias
+        InfoAttribute attribute = new InfoAttribute();
+        attribute.setName(META_ALIAS);
+        attribute.setUuid("d7c95fb8-61a0-11ed-9b6a-0242ac120002");
+        attribute.setContentType(AttributeContentType.STRING);
+        attribute.setType(AttributeType.META);
+        attribute.setDescription("Alias Name for the JKS Entry");
+
+        InfoAttributeProperties attributeProperties = new InfoAttributeProperties();
+        attributeProperties.setLabel("Alias");
+        attributeProperties.setVisible(true);
+
+        attribute.setProperties(attributeProperties);
+        attribute.setContent(List.of(new StringAttributeContent(alias)));
+
+        return attribute;
+    }
+
+    private InfoAttribute getEntryTypeMetadata(Boolean entryType) {
+        //Alias
+        InfoAttribute attribute = new InfoAttribute();
+        attribute.setName(META_ENTRY_TYPE);
+        attribute.setUuid("d7c962c4-61a0-11ed-9b6a-0242ac120002");
+        attribute.setContentType(AttributeContentType.BOOLEAN);
+        attribute.setType(AttributeType.META);
+        attribute.setDescription("Does the location contains the key for the certificate");
+
+        InfoAttributeProperties attributeProperties = new InfoAttributeProperties();
+        attributeProperties.setLabel("Is Private Key Available");
+        attributeProperties.setVisible(true);
+
+        attribute.setProperties(attributeProperties);
+        attribute.setContent(List.of(new BooleanAttributeContent(entryType)));
+
+        return attribute;
+    }
+
+    private InfoAttribute getKspMetadata(String ksp) {
+        //Alias
+        InfoAttribute attribute = new InfoAttribute();
+        attribute.setName(META_KSP);
+        attribute.setUuid("d7c96472-61a0-11ed-9b6a-0242ac120002");
+        attribute.setContentType(AttributeContentType.STRING);
+        attribute.setType(AttributeType.META);
+        attribute.setDescription("Key Store Provider");
+
+        InfoAttributeProperties attributeProperties = new InfoAttributeProperties();
+        attributeProperties.setLabel("Key Store Provider");
+        attributeProperties.setVisible(true);
+
+        attribute.setProperties(attributeProperties);
+        attribute.setContent(List.of(new StringAttributeContent(ksp)));
+
+        return attribute;
     }
 }

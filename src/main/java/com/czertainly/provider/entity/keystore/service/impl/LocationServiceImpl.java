@@ -5,12 +5,12 @@ import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.model.client.attribute.RequestAttributeDto;
 import com.czertainly.api.model.common.attribute.v2.AttributeType;
 import com.czertainly.api.model.common.attribute.v2.DataAttribute;
-import com.czertainly.api.model.common.attribute.v2.InfoAttribute;
-import com.czertainly.api.model.common.attribute.v2.InfoAttributeProperties;
+import com.czertainly.api.model.common.attribute.v2.MetadataAttribute;
 import com.czertainly.api.model.common.attribute.v2.content.AttributeContentType;
 import com.czertainly.api.model.common.attribute.v2.content.BooleanAttributeContent;
 import com.czertainly.api.model.common.attribute.v2.content.SecretAttributeContent;
 import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.properties.MetadataAttributeProperties;
 import com.czertainly.api.model.connector.entity.*;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
@@ -100,7 +100,7 @@ public class LocationServiceImpl implements LocationService {
 
             certificateLocationDto.setWithKey(cert.isKeyEntry());
 
-            List<InfoAttribute> certificateMeta = List.of(getAliasMetadata(cert.getAlias()), getEntryTypeMetadata(cert.isKeyEntry()));
+            List<MetadataAttribute> certificateMeta = List.of(getAliasMetadata(cert.getAlias()), getEntryTypeMetadata(cert.isKeyEntry()));
 
             certificateLocationDto.setMetadata(certificateMeta);
 
@@ -338,7 +338,7 @@ public class LocationServiceImpl implements LocationService {
 
             responseDto.setPushAttributes(pushAttributes);
 
-            List<InfoAttribute> certificateMeta = List.of(getAliasMetadata(alias), getEntryTypeMetadata(true));
+            List<MetadataAttribute> certificateMeta = List.of(getAliasMetadata(alias), getEntryTypeMetadata(true));
             responseDto.setMetadata(certificateMeta);
 
             return responseDto;
@@ -366,16 +366,16 @@ public class LocationServiceImpl implements LocationService {
         return Base64.getUrlEncoder().encodeToString(r);
     }
 
-    private InfoAttribute getAliasMetadata(String alias) {
+    private MetadataAttribute getAliasMetadata(String alias) {
         //Alias
-        InfoAttribute attribute = new InfoAttribute();
+        MetadataAttribute attribute = new MetadataAttribute();
         attribute.setName(META_ALIAS);
         attribute.setUuid("d7c95fb8-61a0-11ed-9b6a-0242ac120002");
         attribute.setContentType(AttributeContentType.STRING);
         attribute.setType(AttributeType.META);
         attribute.setDescription("Alias Name for the JKS Entry");
 
-        InfoAttributeProperties attributeProperties = new InfoAttributeProperties();
+        MetadataAttributeProperties attributeProperties = new MetadataAttributeProperties();
         attributeProperties.setLabel("Alias");
         attributeProperties.setVisible(true);
 
@@ -385,16 +385,16 @@ public class LocationServiceImpl implements LocationService {
         return attribute;
     }
 
-    private InfoAttribute getEntryTypeMetadata(Boolean entryType) {
+    private MetadataAttribute getEntryTypeMetadata(Boolean entryType) {
         //Alias
-        InfoAttribute attribute = new InfoAttribute();
+        MetadataAttribute attribute = new MetadataAttribute();
         attribute.setName(META_ENTRY_TYPE);
         attribute.setUuid("d7c962c4-61a0-11ed-9b6a-0242ac120002");
         attribute.setContentType(AttributeContentType.BOOLEAN);
         attribute.setType(AttributeType.META);
         attribute.setDescription("Does the location contains the key for the certificate");
 
-        InfoAttributeProperties attributeProperties = new InfoAttributeProperties();
+        MetadataAttributeProperties attributeProperties = new MetadataAttributeProperties();
         attributeProperties.setLabel("Is Private Key Available");
         attributeProperties.setVisible(true);
 
@@ -404,16 +404,16 @@ public class LocationServiceImpl implements LocationService {
         return attribute;
     }
 
-    private InfoAttribute getKspMetadata(String ksp) {
+    private MetadataAttribute getKspMetadata(String ksp) {
         //Alias
-        InfoAttribute attribute = new InfoAttribute();
+        MetadataAttribute attribute = new MetadataAttribute();
         attribute.setName(META_KSP);
         attribute.setUuid("d7c96472-61a0-11ed-9b6a-0242ac120002");
         attribute.setContentType(AttributeContentType.STRING);
         attribute.setType(AttributeType.META);
         attribute.setDescription("Key Store Provider");
 
-        InfoAttributeProperties attributeProperties = new InfoAttributeProperties();
+        MetadataAttributeProperties attributeProperties = new MetadataAttributeProperties();
         attributeProperties.setLabel("Key Store Provider");
         attributeProperties.setVisible(true);
 

@@ -1,7 +1,6 @@
 package com.czertainly.provider.entity.keystore.service.impl;
 
 import com.czertainly.api.model.client.attribute.RequestAttributeDto;
-import com.czertainly.api.model.common.attribute.v2.DataAttributeProperties;
 import com.czertainly.api.model.common.attribute.v2.AttributeType;
 import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
 import com.czertainly.api.model.common.attribute.v2.DataAttribute;
@@ -11,6 +10,7 @@ import com.czertainly.api.model.common.attribute.v2.callback.AttributeValueTarge
 import com.czertainly.api.model.common.attribute.v2.content.AttributeContentType;
 import com.czertainly.api.model.common.attribute.v2.content.BaseAttributeContent;
 import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.properties.DataAttributeProperties;
 import com.czertainly.api.model.core.credential.CredentialDto;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;

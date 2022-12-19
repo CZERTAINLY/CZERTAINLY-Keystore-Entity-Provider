@@ -6,9 +6,9 @@ import com.czertainly.api.exception.ValidationError;
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
 import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.content.data.CredentialAttributeContentData;
 import com.czertainly.api.model.connector.entity.EntityInstanceDto;
 import com.czertainly.api.model.connector.entity.EntityInstanceRequestDto;
-import com.czertainly.api.model.core.credential.CredentialDto;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.dao.EntityInstanceRepository;
@@ -96,9 +96,9 @@ public class EntityServiceImpl implements EntityService {
                 )
         );
         instance.setUuid(UUID.randomUUID().toString());
-        CredentialDto credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
+        CredentialAttributeContentData credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
         instance.setCredentialUuid(credential.getUuid());
-        instance.setCredentialData(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.responseAttributeConverter(credential.getAttributes())));
+        instance.setCredentialData(AttributeDefinitionUtils.serialize(credential.getAttributes()));
 
         instance.setAttributes(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.mergeAttributes(attributeService.getAttributes(request.getKind()), request.getAttributes())));
 
@@ -136,9 +136,9 @@ public class EntityServiceImpl implements EntityService {
         instance.setName(request.getName());
         instance.setHost(AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_HOST, request.getAttributes(), StringAttributeContent.class).getData());
         instance.setAuthenticationType(AuthenticationType.findByCode(AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes(), StringAttributeContent.class).getData()));
-        CredentialDto credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
+        CredentialAttributeContentData credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
         instance.setCredentialUuid(credential.getUuid());
-        instance.setCredentialData(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.responseAttributeConverter(credential.getAttributes())));
+        instance.setCredentialData(AttributeDefinitionUtils.serialize(credential.getAttributes()));
         instance.setAttributes(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.mergeAttributes(attributeService.getAttributes(request.getKind()), request.getAttributes())));
 
         // now test the session based on the attributes

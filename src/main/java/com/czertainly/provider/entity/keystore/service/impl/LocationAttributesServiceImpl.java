@@ -114,7 +114,7 @@ public class LocationAttributesServiceImpl implements LocationAttributeService {
         properties.setMultiSelect(false);
         attribute.setProperties(properties);
         attribute.setDescription("Full path to the Keystore located on the Entity");
-        attribute.setConstraints(List.of(new RegexpAttributeConstraint("Keystore Location in the entity", "Enter the valid path", AttributeConstraintType.REGEXP, "^(/[^/ ]*)+/?$")));
+        attribute.setConstraints(List.of(new RegexpAttributeConstraint("Keystore Location in the entity", "Enter the valid path", "^(/[^/ ]*)+/?$")));
         return attribute;
     }
 

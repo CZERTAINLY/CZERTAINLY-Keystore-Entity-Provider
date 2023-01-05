@@ -5,7 +5,6 @@ import com.czertainly.api.model.client.attribute.RequestAttributeDto;
 import com.czertainly.api.model.common.attribute.v2.AttributeType;
 import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
 import com.czertainly.api.model.common.attribute.v2.DataAttribute;
-import com.czertainly.api.model.common.attribute.v2.constraint.AttributeConstraintType;
 import com.czertainly.api.model.common.attribute.v2.constraint.RegexpAttributeConstraint;
 import com.czertainly.api.model.common.attribute.v2.content.AttributeContentType;
 import com.czertainly.api.model.common.attribute.v2.content.BaseAttributeContent;
@@ -114,7 +113,7 @@ public class LocationAttributesServiceImpl implements LocationAttributeService {
         properties.setMultiSelect(false);
         attribute.setProperties(properties);
         attribute.setDescription("Full path to the Keystore located on the Entity");
-        attribute.setConstraints(List.of(new RegexpAttributeConstraint("Keystore Location in the entity", "Enter the valid path", AttributeConstraintType.REGEXP, "^(/[^/ ]*)+/?$")));
+        attribute.setConstraints(List.of(new RegexpAttributeConstraint("Keystore Location in the entity", "Enter the valid path", "^(/[^/ ]*)+/?$")));
         return attribute;
     }
 

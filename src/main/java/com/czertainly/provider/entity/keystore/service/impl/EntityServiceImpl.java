@@ -5,6 +5,7 @@ import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.exception.ValidationError;
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
+import com.czertainly.api.model.common.attribute.v2.content.SecretAttributeContent;
 import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
 import com.czertainly.api.model.common.attribute.v2.content.data.CredentialAttributeContentData;
 import com.czertainly.api.model.connector.entity.EntityInstanceDto;
@@ -210,7 +211,7 @@ public class EntityServiceImpl implements EntityService {
         String username = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, StringAttributeContent.class).getData();
         String password = null;
         if (instance.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, StringAttributeContent.class).getData();
+            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, SecretAttributeContent.class).getData().getSecret();
         }
         //else if (instance.getAuthenticationType().equals(AuthenticationType.SSH)) {
         // TODO

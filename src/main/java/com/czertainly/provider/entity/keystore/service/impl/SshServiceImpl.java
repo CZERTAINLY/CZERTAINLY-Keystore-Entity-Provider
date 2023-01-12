@@ -1,6 +1,7 @@
 package com.czertainly.provider.entity.keystore.service.impl;
 
 import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
+import com.czertainly.api.model.common.attribute.v2.content.SecretAttributeContent;
 import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
@@ -48,7 +49,7 @@ public class SshServiceImpl implements SshService {
         String username = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, StringAttributeContent.class).getData();
         String password = null;
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, StringAttributeContent.class).getData();
+            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, SecretAttributeContent.class).getData().getSecret();
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
         // TODO
@@ -98,7 +99,7 @@ public class SshServiceImpl implements SshService {
         String username = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, StringAttributeContent.class).getData();
         String password = null;
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, StringAttributeContent.class).getData();
+            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, SecretAttributeContent.class).getData().getSecret();
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
         // TODO
@@ -132,7 +133,7 @@ public class SshServiceImpl implements SshService {
         String password = null;
         String username = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, StringAttributeContent.class).getData();
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, StringAttributeContent.class).getData();
+            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, SecretAttributeContent.class).getData().getSecret();
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
         // TODO

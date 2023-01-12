@@ -122,7 +122,7 @@ public class LocationAttributesServiceImpl implements LocationAttributeService {
         attribute.setUuid("12ad2fd2-6ca1-4770-a28d-c2eb35ed02da");
         attribute.setName(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD);
         attribute.setType(AttributeType.DATA);
-        attribute.setContentType(AttributeContentType.STRING);
+        attribute.setContentType(AttributeContentType.SECRET);
         DataAttributeProperties properties = new DataAttributeProperties();
         properties.setLabel(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD_LABEL);
         properties.setRequired(true);

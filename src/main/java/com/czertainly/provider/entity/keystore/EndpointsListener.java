@@ -25,18 +25,18 @@ public class EndpointsListener {
     @EventListener
     public void handleContextRefresh(ContextRefreshedEvent event) {
         ApplicationContext applicationContext = event.getApplicationContext();
-        applicationContext.getBean(RequestMappingHandlerMapping.class)
+        applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class)
                 .getHandlerMethods()
                 .entrySet().stream()
                 .filter(e -> (e.getKey().getMethodsCondition().getMethods() != null && !e.getKey().getMethodsCondition().getMethods().isEmpty()))
                 .forEach(e -> {
                     LOGGER.info("{} {} {}", e.getKey().getMethodsCondition().getMethods(),
-                            e.getKey().getPathPatternsCondition().getPatterns(),
+                            e.getKey().getPatternValues(),
                             e.getValue().getMethod().getName());
 
                     EndpointDto endpoint = new EndpointDto();
                     endpoint.setMethod(e.getKey().getMethodsCondition().getMethods().iterator().next().name());
-                    endpoint.setContext(e.getKey().getPathPatternsCondition().getPatterns().iterator().next().toString());
+                    endpoint.setContext(e.getKey().getPatternValues().iterator().next());
                     endpoint.setName(e.getValue().getMethod().getName());
                     endpoints.add(endpoint);
                 });

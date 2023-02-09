@@ -1,6 +1,6 @@
 # CZERTAINLY Keystore Entity Provider
 
-> This repository is part of the commercial open-source project CZERTAINLY, but the connector is available under subscription. You can find more information about the project at [CZERTAINLY](https://github.com/3KeyCompany/CZERTAINLY) repository, including the contribution guide.
+> This repository is part of the commercial open-source project CZERTAINLY. You can find more information about the project at [CZERTAINLY](https://github.com/3KeyCompany/CZERTAINLY) repository, including the contribution guide.
 
 Keystore Entity Provider `Connector` is the implementation of the following `Function Groups` and `Kinds`:
 
@@ -8,7 +8,7 @@ Keystore Entity Provider `Connector` is the implementation of the following `Fun
 |-------------------|------------|
 | `Entity Provider` | `Keystore` |
 
-Keystore Entity Provider implements automation of certificate management related tasks on the software keystores:
+Keystore Entity Provider implements automation of certificate management related tasks on the software keystore:
 - JKS
 - PKCS#12
 
@@ -56,7 +56,7 @@ For more information, please refer to the [CZERTAINLY documentation](https://doc
 
 ## Docker container
 
-Keystore Entity Provider `Connector` is provided as a Docker container. Use the `docker pull harbor.3key.company/czertainly/czertainly-keystore-entity-provider:tagname` to pull the required image from the repository. It can be configured using the following environment variables:
+Keystore Entity Provider `Connector` is provided as a Docker container. Use the `harbor.3key.company/czertainly/czertainly-keystore-entity-provider:tagname` to pull the required image from the repository. It can be configured using the following environment variables:
 
 | Variable        | Description                                              | Required                                           | Default value |
 |-----------------|----------------------------------------------------------|----------------------------------------------------|---------------|

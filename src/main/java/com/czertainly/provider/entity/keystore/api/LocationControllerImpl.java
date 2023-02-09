@@ -4,16 +4,9 @@ import com.czertainly.api.exception.LocationException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.interfaces.connector.entity.LocationController;
-import com.czertainly.api.model.common.attribute.AttributeDefinition;
-import com.czertainly.api.model.common.attribute.RequestAttributeDto;
-import com.czertainly.api.model.connector.entity.GenerateCsrRequestDto;
-import com.czertainly.api.model.connector.entity.GenerateCsrResponseDto;
-import com.czertainly.api.model.connector.entity.LocationDetailRequestDto;
-import com.czertainly.api.model.connector.entity.LocationDetailResponseDto;
-import com.czertainly.api.model.connector.entity.PushCertificateRequestDto;
-import com.czertainly.api.model.connector.entity.PushCertificateResponseDto;
-import com.czertainly.api.model.connector.entity.RemoveCertificateRequestDto;
-import com.czertainly.api.model.connector.entity.RemoveCertificateResponseDto;
+import com.czertainly.api.model.client.attribute.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
+import com.czertainly.api.model.connector.entity.*;
 import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
 import com.czertainly.provider.entity.keystore.service.EntityService;
 import com.czertainly.provider.entity.keystore.service.LocationAttributeService;
@@ -26,22 +19,24 @@ import java.util.List;
 @RestController
 public class LocationControllerImpl implements LocationController {
 
+    LocationService locationService;
+    EntityService entityService;
+    LocationAttributeService locationAttributeService;
+
     @Autowired
     public void setLocationService(LocationService locationService) {
         this.locationService = locationService;
     }
+
     @Autowired
     public void setEntityService(EntityService entityService) {
         this.entityService = entityService;
     }
+
     @Autowired
     public void setLocationAttributeService(LocationAttributeService locationAttributeService) {
         this.locationAttributeService = locationAttributeService;
     }
-
-    LocationService locationService;
-    EntityService entityService;
-    LocationAttributeService locationAttributeService;
 
     @Override
     public LocationDetailResponseDto getLocationDetail(String entityUuid, LocationDetailRequestDto request) throws NotFoundException, LocationException {
@@ -54,7 +49,7 @@ public class LocationControllerImpl implements LocationController {
     }
 
     @Override
-    public List<AttributeDefinition> listPushCertificateAttributes(String entityUuid) throws NotFoundException {
+    public List<BaseAttribute> listPushCertificateAttributes(String entityUuid) throws NotFoundException {
         EntityInstance entity = entityService.getEntityInstance(entityUuid);
         return locationAttributeService.listPushCertificateAttributes(entity);
     }
@@ -76,7 +71,7 @@ public class LocationControllerImpl implements LocationController {
     }
 
     @Override
-    public List<AttributeDefinition> listGenerateCsrAttributes(String entityUuid) throws NotFoundException {
+    public List<BaseAttribute> listGenerateCsrAttributes(String entityUuid) throws NotFoundException {
         EntityInstance entity = entityService.getEntityInstance(entityUuid);
         return locationAttributeService.listGenerateCsrAttributes(entity);
     }

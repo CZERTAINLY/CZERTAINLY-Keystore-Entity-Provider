@@ -4,11 +4,12 @@ import com.czertainly.api.exception.AlreadyExistException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.exception.ValidationError;
 import com.czertainly.api.exception.ValidationException;
-import com.czertainly.api.model.common.attribute.AttributeDefinition;
-import com.czertainly.api.model.common.attribute.content.BaseAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
+import com.czertainly.api.model.common.attribute.v2.content.SecretAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.content.data.CredentialAttributeContentData;
 import com.czertainly.api.model.connector.entity.EntityInstanceDto;
 import com.czertainly.api.model.connector.entity.EntityInstanceRequestDto;
-import com.czertainly.api.model.core.credential.CredentialDto;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.dao.EntityInstanceRepository;
@@ -35,29 +36,28 @@ import java.util.stream.Collectors;
 @Service
 public class EntityServiceImpl implements EntityService {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     public static final int SSH_PORT = 22;
     public static final int SSH_DEFAULT_TIMEOUT = 30;
-
     private static final Map<Long, ClientSession> sessionCache = new ConcurrentHashMap<>();
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private EntityInstanceRepository entityInstanceRepository;
+    private AttributeService attributeService;
+    private SshClient sshClient;
 
     @Autowired
     public void setEntityInstanceRepository(EntityInstanceRepository entityInstanceRepository) {
         this.entityInstanceRepository = entityInstanceRepository;
     }
+
     @Autowired
     public void setAttributeService(AttributeService attributeService) {
         this.attributeService = attributeService;
     }
+
     @Autowired
     public void setSshClient(SshClient sshClient) {
         this.sshClient = sshClient;
     }
-
-    private EntityInstanceRepository entityInstanceRepository;
-    private AttributeService attributeService;
-    private SshClient sshClient;
 
     @Override
     public List<EntityInstanceDto> listEntityInstances() {
@@ -90,16 +90,16 @@ public class EntityServiceImpl implements EntityService {
 
         EntityInstance instance = new EntityInstance();
         instance.setName(request.getName());
-        instance.setHost(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_HOST, request.getAttributes(), BaseAttributeContent.class));
+        instance.setHost(AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_HOST, request.getAttributes(), StringAttributeContent.class).getData());
         instance.setAuthenticationType(
                 AuthenticationType.findByCode(
-                    AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes(), BaseAttributeContent.class)
+                        AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes(), StringAttributeContent.class).getData()
                 )
         );
         instance.setUuid(UUID.randomUUID().toString());
-        CredentialDto credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
+        CredentialAttributeContentData credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
         instance.setCredentialUuid(credential.getUuid());
-        instance.setCredentialData(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.responseAttributeConverter(credential.getAttributes())));
+        instance.setCredentialData(AttributeDefinitionUtils.serialize(credential.getAttributes()));
 
         instance.setAttributes(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.mergeAttributes(attributeService.getAttributes(request.getKind()), request.getAttributes())));
 
@@ -135,11 +135,11 @@ public class EntityServiceImpl implements EntityService {
         }
 
         instance.setName(request.getName());
-        instance.setHost(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_HOST, request.getAttributes(), BaseAttributeContent.class));
-        instance.setAuthenticationType(AuthenticationType.findByCode(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes(), BaseAttributeContent.class)));
-        CredentialDto credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
+        instance.setHost(AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_HOST, request.getAttributes(), StringAttributeContent.class).getData());
+        instance.setAuthenticationType(AuthenticationType.findByCode(AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_AUTH_TYPE, request.getAttributes(), StringAttributeContent.class).getData()));
+        CredentialAttributeContentData credential = AttributeDefinitionUtils.getCredentialContent(AttributeConstants.ATTRIBUTE_CREDENTIAL, request.getAttributes());
         instance.setCredentialUuid(credential.getUuid());
-        instance.setCredentialData(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.responseAttributeConverter(credential.getAttributes())));
+        instance.setCredentialData(AttributeDefinitionUtils.serialize(credential.getAttributes()));
         instance.setAttributes(AttributeDefinitionUtils.serialize(AttributeDefinitionUtils.mergeAttributes(attributeService.getAttributes(request.getKind()), request.getAttributes())));
 
         // now test the session based on the attributes
@@ -207,19 +207,20 @@ public class EntityServiceImpl implements EntityService {
 
         String host = instance.getHost();
 
-        List<AttributeDefinition> attributes = AttributeDefinitionUtils.deserialize(instance.getCredentialData());
-        String username = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, BaseAttributeContent.class);
+        List<BaseAttribute> attributes = AttributeDefinitionUtils.deserialize(instance.getCredentialData(), BaseAttribute.class);
+        String username = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, StringAttributeContent.class).getData();
+        String password = null;
         if (instance.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            String password = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class);
+            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, SecretAttributeContent.class).getData().getSecret();
         }
         //else if (instance.getAuthenticationType().equals(AuthenticationType.SSH)) {
-            // TODO
+        // TODO
         //}
 
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
 
-            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class));
+            session.addPasswordIdentity(password);
             session.auth().verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
             return session;

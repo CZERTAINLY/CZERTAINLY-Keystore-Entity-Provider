@@ -2,9 +2,15 @@ package com.czertainly.provider.entity.keystore.service.impl;
 
 import com.czertainly.api.exception.LocationException;
 import com.czertainly.api.exception.NotFoundException;
-import com.czertainly.api.model.common.attribute.AttributeDefinition;
-import com.czertainly.api.model.common.attribute.RequestAttributeDto;
-import com.czertainly.api.model.common.attribute.content.BaseAttributeContent;
+import com.czertainly.api.model.client.attribute.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.v2.AttributeType;
+import com.czertainly.api.model.common.attribute.v2.DataAttribute;
+import com.czertainly.api.model.common.attribute.v2.MetadataAttribute;
+import com.czertainly.api.model.common.attribute.v2.content.AttributeContentType;
+import com.czertainly.api.model.common.attribute.v2.content.BooleanAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.content.SecretAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.properties.MetadataAttributeProperties;
 import com.czertainly.api.model.connector.entity.*;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
@@ -37,9 +43,8 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class LocationServiceImpl implements LocationService {
@@ -75,9 +80,9 @@ public class LocationServiceImpl implements LocationService {
 
         locationAttributeService.validateLocationAttributes(entity, request.getLocationAttributes());
 
-        String keystorePath = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH, request.getLocationAttributes(), BaseAttributeContent.class);
-        String keystorePassword = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), BaseAttributeContent.class);
-        String keystoreType = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), BaseAttributeContent.class);
+        String keystorePath = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH, request.getLocationAttributes(), StringAttributeContent.class).getData();
+        String keystorePassword = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), SecretAttributeContent.class).getData().getSecret();
+        String keystoreType = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), StringAttributeContent.class).getData();
 
         String response = sshService.runRemoteCommand(KeytoolCommand.prepareKeytoolListCommand(keystorePath, keystoreType, keystorePassword), entity);
 
@@ -95,52 +100,50 @@ public class LocationServiceImpl implements LocationService {
 
             certificateLocationDto.setWithKey(cert.isKeyEntry());
 
-            Map<String, Object> certificateMeta = new LinkedHashMap<>();
-            certificateMeta.put(META_ALIAS, cert.getAlias());
-            certificateMeta.put(META_ENTRY_TYPE, cert.isKeyEntry());
+            List<MetadataAttribute> certificateMeta = List.of(getAliasMetadata(cert.getAlias()), getEntryTypeMetadata(cert.isKeyEntry()));
 
             certificateLocationDto.setMetadata(certificateMeta);
 
-            List<AttributeDefinition> pushAttributes = new ArrayList<>();
-            AttributeDefinition aliasAttribute = new AttributeDefinition();
+            List<DataAttribute> pushAttributes = new ArrayList<>();
+            DataAttribute aliasAttribute = new DataAttribute();
             aliasAttribute.setName(AttributeConstants.ATTRIBUTE_ALIAS_NAME);
-            aliasAttribute.setContent(new BaseAttributeContent<>(cert.getAlias()));
+            aliasAttribute.setContent(List.of(new StringAttributeContent(cert.getAlias())));
             pushAttributes.add(aliasAttribute);
 
             certificateLocationDto.setPushAttributes(pushAttributes);
 
-            List<AttributeDefinition> csrAttributes = new ArrayList<>();
+            List<DataAttribute> csrAttributes = new ArrayList<>();
             if (cert.isKeyEntry()) {
-                AttributeDefinition subjectDnAttribute = new AttributeDefinition();
+                DataAttribute subjectDnAttribute = new DataAttribute();
                 subjectDnAttribute.setName(AttributeConstants.ATTRIBUTE_DN_NAME);
-                subjectDnAttribute.setContent(new BaseAttributeContent<>(cert.getCertificate().getSubjectDN().toString()));
+                subjectDnAttribute.setContent(List.of(new StringAttributeContent(cert.getCertificate().getSubjectDN().toString())));
                 csrAttributes.add(subjectDnAttribute);
 
                 PublicKey pubk = cert.getCertificate().getPublicKey();
-                AttributeDefinition keyAlgorithmAttribute = new AttributeDefinition();
+                DataAttribute keyAlgorithmAttribute = new DataAttribute();
                 keyAlgorithmAttribute.setName(AttributeConstants.ATTRIBUTE_KEY_ALG_NAME);
-                keyAlgorithmAttribute.setContent(new BaseAttributeContent<>(pubk.getAlgorithm()));
+                keyAlgorithmAttribute.setContent(List.of(new StringAttributeContent(pubk.getAlgorithm())));
                 csrAttributes.add(keyAlgorithmAttribute);
 
-                AttributeDefinition keyLengthAttribute = new AttributeDefinition();
+                DataAttribute keyLengthAttribute = new DataAttribute();
                 keyLengthAttribute.setName(AttributeConstants.ATTRIBUTE_KEY_SIZE_NAME);
                 if (pubk instanceof RSAPublicKey) {
                     RSAPublicKey rsaPubk = (RSAPublicKey) pubk;
-                    keyLengthAttribute.setContent(new BaseAttributeContent<>(String.valueOf(rsaPubk.getModulus().bitLength())));
+                    keyLengthAttribute.setContent(List.of(new StringAttributeContent(String.valueOf(rsaPubk.getModulus().bitLength()))));
                 } else if (pubk instanceof ECPublicKey) {
                     ECPublicKey ecPubk = (ECPublicKey) pubk;
-                    keyLengthAttribute.setContent(new BaseAttributeContent<>(String.valueOf(ecPubk.getParams().getCurve().getField().getFieldSize())));
+                    keyLengthAttribute.setContent(List.of(new StringAttributeContent(String.valueOf(ecPubk.getParams().getCurve().getField().getFieldSize()))));
                 } else if (pubk instanceof DSAPublicKey) {
                     DSAPublicKey dsaPubk = (DSAPublicKey) pubk;
-                    keyLengthAttribute.setContent(new BaseAttributeContent<>(String.valueOf(dsaPubk.getParams().getP().bitLength())));
+                    keyLengthAttribute.setContent(List.of(new StringAttributeContent(String.valueOf(dsaPubk.getParams().getP().bitLength()))));
                 } else {
-                    keyLengthAttribute.setContent(new BaseAttributeContent<>("unknown"));
+                    keyLengthAttribute.setContent(List.of(new StringAttributeContent("unknown")));
                 }
                 csrAttributes.add(keyLengthAttribute);
 
-                AttributeDefinition signatureAlgorithmAttribute = new AttributeDefinition();
+                DataAttribute signatureAlgorithmAttribute = new DataAttribute();
                 signatureAlgorithmAttribute.setName(AttributeConstants.ATTRIBUTE_SIG_ALG_NAME);
-                signatureAlgorithmAttribute.setContent(new BaseAttributeContent<>(cert.getCertificate().getSigAlgName()));
+                signatureAlgorithmAttribute.setContent(List.of(new StringAttributeContent(cert.getCertificate().getSigAlgName())));
                 csrAttributes.add(signatureAlgorithmAttribute);
 
                 // alias include
@@ -152,14 +155,11 @@ public class LocationServiceImpl implements LocationService {
             certificates.add(certificateLocationDto);
         }
 
-        Map<String, Object> locationMeta = new LinkedHashMap<>();
-        locationMeta.put(META_KSP, KeystoreResponseUtil.getKeystoreProvider(response));
-
         LocationDetailResponseDto responseDto = new LocationDetailResponseDto();
         responseDto.setMultipleEntries(true);
         responseDto.setSupportKeyManagement(true);
         responseDto.setCertificates(certificates);
-        responseDto.setMetadata(locationMeta);
+        responseDto.setMetadata(List.of(getKspMetadata(KeystoreResponseUtil.getKeystoreProvider(response))));
 
         return responseDto;
     }
@@ -171,17 +171,14 @@ public class LocationServiceImpl implements LocationService {
         locationAttributeService.validateLocationAttributes(entity, request.getLocationAttributes());
         locationAttributeService.validatePushCertificateAttributes(entity, request.getPushAttributes());
 
-        String alias = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_ALIAS_NAME, request.getPushAttributes(), BaseAttributeContent.class);
-        String keystorePath = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH, request.getLocationAttributes(), BaseAttributeContent.class);
-        String keystorePassword = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), BaseAttributeContent.class);
-        String keystoreType = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), BaseAttributeContent.class);
+        String alias = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_ALIAS_NAME, request.getPushAttributes(), StringAttributeContent.class).getData();
+        String keystorePath = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH, request.getLocationAttributes(), StringAttributeContent.class).getData();
+        String keystorePassword = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), SecretAttributeContent.class).getData().getSecret();
+        String keystoreType = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), StringAttributeContent.class).getData();
 
         PushCertificateResponseDto responseDto = new PushCertificateResponseDto();
 
-        Map<String, Object> meta = new LinkedHashMap<>();
-        meta.put(META_ALIAS, alias);
-
-        responseDto.setCertificateMetadata(meta);
+        responseDto.setCertificateMetadata(List.of(getAliasMetadata(alias)));
 
         String filename = "/tmp/" + generateRandomFilename();
 
@@ -216,11 +213,10 @@ public class LocationServiceImpl implements LocationService {
 
             String updResponse = sshService.runRemoteCommand(KeytoolCommand.prepareKeytoolDetailCommand(keystorePath, keystoreType, keystorePassword, alias), entity);
             List<KeystoreCertificate> certs = KeystoreResponseUtil.getAllKeystoreCertificates(updResponse);
-            if(certs.isEmpty()){
+            if (certs.isEmpty()) {
                 throw new LocationException(response);
             } else {
-                meta.put(META_ENTRY_TYPE, certs.get(0).isKeyEntry());
-                responseDto.setCertificateMetadata(meta);
+                responseDto.setCertificateMetadata(List.of(getEntryTypeMetadata(certs.get(0).isKeyEntry())));
                 responseDto.setWithKey(certs.get(0).isKeyEntry());
             }
 
@@ -254,7 +250,7 @@ public class LocationServiceImpl implements LocationService {
 
         RemoveCertificateResponseDto responseDto = new RemoveCertificateResponseDto();
 
-        String alias = (String) request.getCertificateMetadata().get(META_ALIAS);
+        String alias = AttributeDefinitionUtils.getSingleItemAttributeContentValue(META_ALIAS, request.getCertificateMetadata(), StringAttributeContent.class).getData();
 
         if (!StringUtils.isNotBlank(alias)) {
             String message = "Alias not found in the certificate metadata for Entity " + entityUuid + ". Nothing to remove";
@@ -264,9 +260,9 @@ public class LocationServiceImpl implements LocationService {
             return responseDto;
         }
 
-        String keystorePath = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH, request.getLocationAttributes(), BaseAttributeContent.class);
-        String keystorePassword = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), BaseAttributeContent.class);
-        String keystoreType = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), BaseAttributeContent.class);
+        String keystorePath = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH, request.getLocationAttributes(), StringAttributeContent.class).getData();
+        String keystorePassword = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), SecretAttributeContent.class).getData().getSecret();
+        String keystoreType = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), StringAttributeContent.class).getData();
 
         String response = sshService.runRemoteCommand(
                 KeytoolCommand.prepareKeytoolRemoveCertificateCommand(keystorePath, keystoreType, keystorePassword, alias),
@@ -277,9 +273,7 @@ public class LocationServiceImpl implements LocationService {
             throw new LocationException(response);
         }
 
-        Map<String, Object> meta = request.getCertificateMetadata();
-        meta.remove(META_ALIAS);
-        responseDto.setCertificateMetadata(meta);
+        responseDto.setCertificateMetadata(request.getCertificateMetadata().stream().filter(e -> !entity.getName().equals(META_ALIAS)).collect(Collectors.toList()));
 
         return responseDto;
     }
@@ -291,14 +285,14 @@ public class LocationServiceImpl implements LocationService {
         locationAttributeService.validateLocationAttributes(entity, request.getLocationAttributes());
         locationAttributeService.validateGenerateCsrAttributes(entity, request.getCsrAttributes());
 
-        String alias = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_ALIAS_NAME, request.getCsrAttributes(), BaseAttributeContent.class);
-        String keyalg = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEY_ALG_NAME, request.getCsrAttributes(), BaseAttributeContent.class);
-        String keysize = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEY_SIZE_NAME, request.getCsrAttributes(), BaseAttributeContent.class);
-        String sigalg = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_SIG_ALG_NAME, request.getCsrAttributes(), BaseAttributeContent.class);
-        String dname = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_DN_NAME, request.getCsrAttributes(), BaseAttributeContent.class);
-        String keystorePath = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH, request.getLocationAttributes(), BaseAttributeContent.class);
-        String keystorePassword = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), BaseAttributeContent.class);
-        String keystoreType = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), BaseAttributeContent.class);
+        String alias = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_ALIAS_NAME, request.getCsrAttributes(), StringAttributeContent.class).getData();
+        String keyalg = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEY_ALG_NAME, request.getCsrAttributes(), StringAttributeContent.class).getData();
+        String keysize = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEY_SIZE_NAME, request.getCsrAttributes(), StringAttributeContent.class).getData();
+        String sigalg = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_SIG_ALG_NAME, request.getCsrAttributes(), StringAttributeContent.class).getData();
+        String dname = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_DN_NAME, request.getCsrAttributes(), StringAttributeContent.class).getData();
+        String keystorePath = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PATH, request.getLocationAttributes(), StringAttributeContent.class).getData();
+        String keystorePassword = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_PASSWORD, request.getLocationAttributes(), SecretAttributeContent.class).getData().getSecret();
+        String keystoreType = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), StringAttributeContent.class).getData();
 
         // TODO: validation of the attribute values
 
@@ -339,15 +333,12 @@ public class LocationServiceImpl implements LocationService {
 
             RequestAttributeDto aliasRequestAttribute = new RequestAttributeDto();
             aliasRequestAttribute.setName(AttributeConstants.ATTRIBUTE_ALIAS_NAME);
-            aliasRequestAttribute.setContent(new BaseAttributeContent<>(alias));
+            aliasRequestAttribute.setContent(List.of(new StringAttributeContent(alias)));
             pushAttributes.add(aliasRequestAttribute);
 
             responseDto.setPushAttributes(pushAttributes);
 
-            Map<String, Object> certificateMeta = new LinkedHashMap<>();
-            certificateMeta.put(META_ALIAS, alias);
-            certificateMeta.put(META_ENTRY_TYPE, true);
-
+            List<MetadataAttribute> certificateMeta = List.of(getAliasMetadata(alias), getEntryTypeMetadata(true));
             responseDto.setMetadata(certificateMeta);
 
             return responseDto;
@@ -373,5 +364,62 @@ public class LocationServiceImpl implements LocationService {
         byte[] r = new byte[8];
         random.nextBytes(r);
         return Base64.getUrlEncoder().encodeToString(r);
+    }
+
+    private MetadataAttribute getAliasMetadata(String alias) {
+        //Alias
+        MetadataAttribute attribute = new MetadataAttribute();
+        attribute.setName(META_ALIAS);
+        attribute.setUuid("d7c95fb8-61a0-11ed-9b6a-0242ac120002");
+        attribute.setContentType(AttributeContentType.STRING);
+        attribute.setType(AttributeType.META);
+        attribute.setDescription("Alias Name for the JKS Entry");
+
+        MetadataAttributeProperties attributeProperties = new MetadataAttributeProperties();
+        attributeProperties.setLabel("Alias");
+        attributeProperties.setVisible(true);
+
+        attribute.setProperties(attributeProperties);
+        attribute.setContent(List.of(new StringAttributeContent(alias)));
+
+        return attribute;
+    }
+
+    private MetadataAttribute getEntryTypeMetadata(Boolean entryType) {
+        //Alias
+        MetadataAttribute attribute = new MetadataAttribute();
+        attribute.setName(META_ENTRY_TYPE);
+        attribute.setUuid("d7c962c4-61a0-11ed-9b6a-0242ac120002");
+        attribute.setContentType(AttributeContentType.BOOLEAN);
+        attribute.setType(AttributeType.META);
+        attribute.setDescription("Does the location contains the key for the certificate");
+
+        MetadataAttributeProperties attributeProperties = new MetadataAttributeProperties();
+        attributeProperties.setLabel("Is Private Key Available");
+        attributeProperties.setVisible(true);
+
+        attribute.setProperties(attributeProperties);
+        attribute.setContent(List.of(new BooleanAttributeContent(entryType)));
+
+        return attribute;
+    }
+
+    private MetadataAttribute getKspMetadata(String ksp) {
+        //Alias
+        MetadataAttribute attribute = new MetadataAttribute();
+        attribute.setName(META_KSP);
+        attribute.setUuid("d7c96472-61a0-11ed-9b6a-0242ac120002");
+        attribute.setContentType(AttributeContentType.STRING);
+        attribute.setType(AttributeType.META);
+        attribute.setDescription("Key Store Provider");
+
+        MetadataAttributeProperties attributeProperties = new MetadataAttributeProperties();
+        attributeProperties.setLabel("Key Store Provider");
+        attributeProperties.setVisible(true);
+
+        attribute.setProperties(attributeProperties);
+        attribute.setContent(List.of(new StringAttributeContent(ksp)));
+
+        return attribute;
     }
 }

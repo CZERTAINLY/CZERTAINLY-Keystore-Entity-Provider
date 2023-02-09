@@ -1,7 +1,8 @@
 package com.czertainly.provider.entity.keystore.service.impl;
 
-import com.czertainly.api.model.common.attribute.AttributeDefinition;
-import com.czertainly.api.model.common.attribute.content.BaseAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
+import com.czertainly.api.model.common.attribute.v2.content.SecretAttributeContent;
+import com.czertainly.api.model.common.attribute.v2.content.StringAttributeContent;
 import com.czertainly.core.util.AttributeDefinitionUtils;
 import com.czertainly.provider.entity.keystore.AttributeConstants;
 import com.czertainly.provider.entity.keystore.aop.TrackExecutionTime;
@@ -29,36 +30,35 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class SshServiceImpl implements SshService {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     public static final int SSH_PORT = 22;
     public static final int SSH_DEFAULT_TIMEOUT = 30;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    SshClient sshClient;
 
     @Autowired
     public void setSshClient(SshClient sshClient) {
         this.sshClient = sshClient;
     }
 
-    SshClient sshClient;
-
     @TrackExecutionTime
     @Override
     public synchronized String runRemoteCommand(String command, EntityInstance entity) {
         String host = entity.getHost();
 
-        List<AttributeDefinition> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData());
-        String username = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, BaseAttributeContent.class);
+        List<BaseAttribute> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData(), BaseAttribute.class);
+        String username = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, StringAttributeContent.class).getData();
+        String password = null;
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            String password = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class);
+            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, SecretAttributeContent.class).getData().getSecret();
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
-            // TODO
+        // TODO
         //}
 
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
 
-            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class));
+            session.addPasswordIdentity(password);
             session.auth().verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
             logger.debug("Executing command on host {}: {}", host, command);
@@ -73,7 +73,7 @@ public class SshServiceImpl implements SshService {
                     String responseString = responseStream.toString();
 
                     logger.debug("Response from host {}: {}", host, responseString);
-                    
+
                     return responseString;
                 } finally {
                     channel.close(false);
@@ -95,19 +95,20 @@ public class SshServiceImpl implements SshService {
     public void uploadFile(EntityInstance entity, String source, String destination) {
         String host = entity.getHost();
 
-        List<AttributeDefinition> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData());
-        String username = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, BaseAttributeContent.class);
+        List<BaseAttribute> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData(), BaseAttribute.class);
+        String username = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, StringAttributeContent.class).getData();
+        String password = null;
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            String password = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class);
+            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, SecretAttributeContent.class).getData().getSecret();
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
-            // TODO
+        // TODO
         //}
 
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
 
-            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class));
+            session.addPasswordIdentity(password);
             session.auth().verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
             ScpClientCreator creator = ScpClientCreator.instance();
@@ -128,26 +129,27 @@ public class SshServiceImpl implements SshService {
     public void downloadFile(EntityInstance entity, String remote, String local) {
         String host = entity.getHost();
 
-        List<AttributeDefinition> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData());
-        String username = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, BaseAttributeContent.class);
+        List<BaseAttribute> attributes = AttributeDefinitionUtils.deserialize(entity.getCredentialData(), BaseAttribute.class);
+        String password = null;
+        String username = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_USERNAME, attributes, StringAttributeContent.class).getData();
         if (entity.getAuthenticationType().equals(AuthenticationType.BASIC)) {
-            String password = AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class);
+            password = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, SecretAttributeContent.class).getData().getSecret();
         }
         //else if (entity.getAuthenticationType().equals(AuthenticationType.SSH)) {
-            // TODO
+        // TODO
         //}
 
         try (ClientSession session = sshClient.connect(username, host, SSH_PORT)
                 .verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS).getSession()) {
 
-            session.addPasswordIdentity(AttributeDefinitionUtils.getAttributeContentValue(AttributeConstants.ATTRIBUTE_PASSWORD, attributes, BaseAttributeContent.class));
+            session.addPasswordIdentity(password);
             session.auth().verify(SSH_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 
             ScpClientCreator creator = ScpClientCreator.instance();
             ScpClient client = creator.createScpClient(session);
 
             logger.debug("Downloading file {} from host {} to {}", remote, host, local);
-            
+
             client.download(remote, local);
 
         } catch (IOException e) {

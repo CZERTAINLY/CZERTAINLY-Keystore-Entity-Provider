@@ -4,8 +4,8 @@ import com.czertainly.api.exception.AlreadyExistException;
 import com.czertainly.api.exception.NotFoundException;
 import com.czertainly.api.exception.ValidationException;
 import com.czertainly.api.interfaces.connector.entity.EntityController;
-import com.czertainly.api.model.common.attribute.AttributeDefinition;
-import com.czertainly.api.model.common.attribute.RequestAttributeDto;
+import com.czertainly.api.model.client.attribute.RequestAttributeDto;
+import com.czertainly.api.model.common.attribute.v2.BaseAttribute;
 import com.czertainly.api.model.connector.entity.EntityInstanceDto;
 import com.czertainly.api.model.connector.entity.EntityInstanceRequestDto;
 import com.czertainly.provider.entity.keystore.dao.entity.EntityInstance;
@@ -19,17 +19,18 @@ import java.util.List;
 @RestController
 public class EntityControllerImpl implements EntityController {
 
+    EntityService entityService;
+    LocationAttributeService locationAttributeService;
+
     @Autowired
     public void setEntityService(EntityService entityService) {
         this.entityService = entityService;
     }
+
     @Autowired
     public void setLocationAttributeService(LocationAttributeService locationAttributeService) {
         this.locationAttributeService = locationAttributeService;
     }
-
-    EntityService entityService;
-    LocationAttributeService locationAttributeService;
 
     @Override
     public List<EntityInstanceDto> listEntityInstances() {
@@ -57,7 +58,7 @@ public class EntityControllerImpl implements EntityController {
     }
 
     @Override
-    public List<AttributeDefinition> listLocationAttributes(String entityUuid) throws NotFoundException {
+    public List<BaseAttribute> listLocationAttributes(String entityUuid) throws NotFoundException {
         EntityInstance entity = entityService.getEntityInstance(entityUuid);
         return locationAttributeService.listLocationAttributes(entity);
     }

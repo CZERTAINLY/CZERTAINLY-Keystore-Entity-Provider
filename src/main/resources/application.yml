@@ -20,15 +20,18 @@ ejbca:
   timeout:
     connect: 500
     request: 1500
+
 management:
   endpoints:
-    jmx:
-      exposure:
-        exclude: '*'
     web:
       base-path: '/'
       exposure:
-        include: health, info
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 aspect:
   enabled: false
 logging:

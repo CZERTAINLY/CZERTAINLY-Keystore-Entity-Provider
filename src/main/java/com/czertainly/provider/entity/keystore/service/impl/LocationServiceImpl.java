@@ -108,6 +108,7 @@ public class LocationServiceImpl implements LocationService {
             DataAttribute aliasAttribute = new DataAttribute();
             aliasAttribute.setName(AttributeConstants.ATTRIBUTE_ALIAS_NAME);
             aliasAttribute.setContent(List.of(new StringAttributeContent(cert.getAlias())));
+            aliasAttribute.setContentType(AttributeContentType.STRING);
             pushAttributes.add(aliasAttribute);
 
             certificateLocationDto.setPushAttributes(pushAttributes);
@@ -117,16 +118,19 @@ public class LocationServiceImpl implements LocationService {
                 DataAttribute subjectDnAttribute = new DataAttribute();
                 subjectDnAttribute.setName(AttributeConstants.ATTRIBUTE_DN_NAME);
                 subjectDnAttribute.setContent(List.of(new StringAttributeContent(cert.getCertificate().getSubjectDN().toString())));
+                subjectDnAttribute.setContentType(AttributeContentType.STRING);
                 csrAttributes.add(subjectDnAttribute);
 
                 PublicKey pubk = cert.getCertificate().getPublicKey();
                 DataAttribute keyAlgorithmAttribute = new DataAttribute();
                 keyAlgorithmAttribute.setName(AttributeConstants.ATTRIBUTE_KEY_ALG_NAME);
                 keyAlgorithmAttribute.setContent(List.of(new StringAttributeContent(pubk.getAlgorithm())));
+                keyAlgorithmAttribute.setContentType(AttributeContentType.STRING);
                 csrAttributes.add(keyAlgorithmAttribute);
 
                 DataAttribute keyLengthAttribute = new DataAttribute();
                 keyLengthAttribute.setName(AttributeConstants.ATTRIBUTE_KEY_SIZE_NAME);
+                keyLengthAttribute.setContentType(AttributeContentType.STRING);
                 if (pubk instanceof RSAPublicKey) {
                     RSAPublicKey rsaPubk = (RSAPublicKey) pubk;
                     keyLengthAttribute.setContent(List.of(new StringAttributeContent(String.valueOf(rsaPubk.getModulus().bitLength()))));
@@ -144,6 +148,7 @@ public class LocationServiceImpl implements LocationService {
                 DataAttribute signatureAlgorithmAttribute = new DataAttribute();
                 signatureAlgorithmAttribute.setName(AttributeConstants.ATTRIBUTE_SIG_ALG_NAME);
                 signatureAlgorithmAttribute.setContent(List.of(new StringAttributeContent(cert.getCertificate().getSigAlgName())));
+                signatureAlgorithmAttribute.setContentType(AttributeContentType.STRING);
                 csrAttributes.add(signatureAlgorithmAttribute);
 
                 // alias include
@@ -177,8 +182,6 @@ public class LocationServiceImpl implements LocationService {
         String keystoreType = AttributeDefinitionUtils.getSingleItemAttributeContentValue(AttributeConstants.ATTRIBUTE_KEYSTORE_TYPE, request.getLocationAttributes(), StringAttributeContent.class).getData();
 
         PushCertificateResponseDto responseDto = new PushCertificateResponseDto();
-
-        responseDto.setCertificateMetadata(List.of(getAliasMetadata(alias)));
 
         String filename = "/tmp/" + generateRandomFilename();
 
@@ -216,7 +219,7 @@ public class LocationServiceImpl implements LocationService {
             if (certs.isEmpty()) {
                 throw new LocationException(response);
             } else {
-                responseDto.setCertificateMetadata(List.of(getEntryTypeMetadata(certs.get(0).isKeyEntry())));
+                responseDto.setCertificateMetadata(List.of(getAliasMetadata(alias), getEntryTypeMetadata(certs.get(0).isKeyEntry())));
                 responseDto.setWithKey(certs.get(0).isKeyEntry());
             }
 

@@ -12,11 +12,13 @@
 
     <groupId>com.czertainly</groupId>
     <artifactId>keystore-entity-provider</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2-SNAPSHOT</version>
     <name>CZERTAINLY-Keystore-Entity-Provider</name>
 
     <properties>
-        <sonar.projectKey>3KeyCompany_CZERTAINLY-Keystore-Entity-Provider</sonar.projectKey>
+        <sonar.organization>czertainly</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.projectKey>CZERTAINLY_CZERTAINLY-Keystore-Entity-Provider</sonar.projectKey>
     </properties>
 
     <dependencies>

@@ -7,15 +7,15 @@
     <parent>
         <groupId>com.czertainly</groupId>
         <artifactId>dependencies</artifactId>
-        <version>1.1.0</version>
+        <version>1.3.0</version>
     </parent>
 
-    <groupId>com.czertainly</groupId>
     <artifactId>keystore-entity-provider</artifactId>
     <version>1.4.2-SNAPSHOT</version>
     <name>CZERTAINLY-Keystore-Entity-Provider</name>
 
     <properties>
+        <java.version>21</java.version>
         <sonar.organization>czertainly</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.projectKey>CZERTAINLY_CZERTAINLY-Keystore-Entity-Provider</sonar.projectKey>
@@ -26,18 +26,18 @@
         <dependency>
             <groupId>com.czertainly</groupId>
             <artifactId>interfaces</artifactId>
-            <version>2.10.0</version>
+            <version>2.14.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
-            <version>2.11.0</version>
+            <version>2.14.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-scp</artifactId>
-            <version>2.11.0</version>
+            <version>2.14.0</version>
         </dependency>
         
         <dependency>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.11.0</version>
+            <version>2.17.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/net.sf.kxml/kxml2 -->
@@ -172,6 +172,13 @@
                 <artifactId>hibernate-enhance-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>@{argLine}</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
@@ -179,13 +186,6 @@
     </build>
 
     <repositories>
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/3keycompany/*</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
         <repository>
             <id>ossrh</id>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>

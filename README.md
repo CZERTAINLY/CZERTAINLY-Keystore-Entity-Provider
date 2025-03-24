@@ -1,6 +1,6 @@
 # CZERTAINLY Keystore Entity Provider
 
-> This repository is part of the commercial open-source project CZERTAINLY. You can find more information about the project at [CZERTAINLY](https://github.com/3KeyCompany/CZERTAINLY) repository, including the contribution guide.
+> This repository is part of the commercial open-source project CZERTAINLY. You can find more information about the project at [CZERTAINLY](https://github.com/CZERTAINLY/CZERTAINLY) repository, including the contribution guide.
 
 Keystore Entity Provider `Connector` is the implementation of the following `Function Groups` and `Kinds`:
 
@@ -32,7 +32,7 @@ Keystore Entity Provider `Connector` provides access to the keystore locations o
 
 The certificate operations are provided by the CZERTAINLY `Core` platform consistently across `Entity Providers`.
 
-To know more about the `Core`, refer to [CZERTAINLY Core](https://github.com/3KeyCompany/CZERTAINLY-Core)
+To know more about the `Core`, refer to [CZERTAINLY Core](https://github.com/CZERTAINLY/CZERTAINLY-Core)
 
 ### `Entity` attributes
 
@@ -50,13 +50,13 @@ The attributes for creating a new `Location` includes:
 
 ## Interfaces
 
-Keystore Entity Provider implements `Entity Provider` interfaces. To learn more about the interfaces and end points, refer to the [CZERTAINLY Interfaces](https://github.com/3KeyCompany/CZERTAINLY-Interfaces).
+Keystore Entity Provider implements `Entity Provider` interfaces. To learn more about the interfaces and end points, refer to the [CZERTAINLY Interfaces](https://github.com/CZERTAINLY/CZERTAINLY-Interfaces).
 
 For more information, please refer to the [CZERTAINLY documentation](https://docs.czertainly.com).
 
 ## Docker container
 
-Keystore Entity Provider `Connector` is provided as a Docker container. Use the `3keycompany/czertainly-keystore-entity-provider:tagname` to pull the required image from the repository. It can be configured using the following environment variables:
+Keystore Entity Provider `Connector` is provided as a Docker container. Use the `docker.io/czertainly/czertainly-keystore-entity-provider:tagname` to pull the required image from the repository. It can be configured using the following environment variables:
 
 | Variable        | Description                                              | Required                                           | Default value |
 |-----------------|----------------------------------------------------------|----------------------------------------------------|---------------|

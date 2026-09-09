@@ -63,30 +63,40 @@ public class SshServiceImpl implements SshService {
 
             logger.debug("Executing command on host {}: {}", host, command);
 
-            try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
-                 ClientChannel channel = session.createChannel(Channel.CHANNEL_EXEC, command)) {
+            return getResponse(command, session, host);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to initiate SSH session.", e);
+        }
+    }
 
-                channel.setOut(responseStream);
-                try {
-                    channel.open().verify(30, TimeUnit.SECONDS);
-                    channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), TimeUnit.SECONDS.toMillis(30));
-                    String responseString = responseStream.toString();
+    private String getResponse(String command, ClientSession session, String host) {
+        try (ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+             ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+             ClientChannel channel = session.createChannel(Channel.CHANNEL_EXEC, command)) {
 
-                    logger.debug("Response from host {}: {}", host, responseString);
+            channel.setOut(responseStream);
+            channel.setErr(errorStream);
+            try {
+                channel.open().verify(30, TimeUnit.SECONDS);
+                channel.waitFor(EnumSet.of(ClientChannelEvent.CLOSED), TimeUnit.SECONDS.toMillis(30));
+                String responseString = responseStream.toString();
+                String errorString = errorStream.toString();
 
-                    return responseString;
-                } finally {
-                    channel.close(false);
+                if (!errorString.isEmpty()) {
+                    logger.debug("Error from host {}: {}", host, errorString);
+                    throw new IllegalStateException("Remote command failed: " + errorString);
                 }
 
+                logger.debug("Response from host {}: {}", host, responseString);
 
-            } catch (IOException e) {
-                logger.debug("Failed to initiate SSH channel.", e);
-                throw new IllegalStateException("Failed to initiate SSH channel.", e);
+                return responseString;
+            } finally {
+                channel.close(false);
             }
+
+
         } catch (IOException e) {
-            logger.debug("Failed to initiate SSH session.", e);
-            throw new IllegalStateException("Failed to initiate SSH session.", e);
+            throw new IllegalStateException("Failed to initiate SSH channel.", e);
         }
     }
 

@@ -52,11 +52,6 @@
             <version>2.17.0</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/net.sf.kxml/kxml2 -->
-        <dependency>
-            <groupId>net.sf.kxml</groupId>
-            <artifactId>kxml2</artifactId>
-        </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
@@ -123,6 +118,13 @@
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
+            <exclusions>
+                <!-- Only used by the stateful and HA server paths, which this client does not use -->
+                <exclusion>
+                    <groupId>org.glassfish.ha</groupId>
+                    <artifactId>ha-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Tests -->

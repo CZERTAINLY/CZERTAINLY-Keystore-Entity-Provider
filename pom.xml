@@ -16,6 +16,8 @@
 
     <properties>
         <java.version>21</java.version>
+        <!-- CVE-2026-75595 in netty-handler, reaching the image transitively -->
+        <netty.version>4.1.137.Final</netty.version>
         <sonar.organization>czertainly</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.projectKey>CZERTAINLY_CZERTAINLY-Keystore-Entity-Provider</sonar.projectKey>
@@ -52,11 +54,6 @@
             <version>2.17.0</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/net.sf.kxml/kxml2 -->
-        <dependency>
-            <groupId>net.sf.kxml</groupId>
-            <artifactId>kxml2</artifactId>
-        </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
@@ -123,6 +120,13 @@
         <dependency>
             <groupId>com.sun.xml.ws</groupId>
             <artifactId>jaxws-rt</artifactId>
+            <exclusions>
+                <!-- Only used by the stateful and HA server paths, which this client does not use -->
+                <exclusion>
+                    <groupId>org.glassfish.ha</groupId>
+                    <artifactId>ha-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Tests -->
